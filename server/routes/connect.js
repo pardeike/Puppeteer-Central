@@ -26,7 +26,7 @@ async function helloGame(n, user, ws) {
 	var client = peers.findClient(user)
 	if (!client) {
 		if (debugCommands) console.log(`#${n} adding default viewer`)
-		client = peers.addClient(user, {
+		client = peers.addClient('GAME', user, {
 			ws: undefined,
 			online: settings.info.online,
 			title: settings.info.title,
@@ -50,7 +50,7 @@ async function helloViewer(n, user, ws) {
 	if (debugCommands) console.log(`#${n} settings: ${JSON.stringify(settings)}`)
 	const info = settings.info
 	if (debugCommands) console.log(`#${n} adding viewer ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
-	const client = peers.addClient(user, {
+	const client = peers.addClient('VIEWER', user, {
 		ws,
 		online: info.online,
 		title: info.title,

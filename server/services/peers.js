@@ -59,13 +59,19 @@ const safeSend = (msg) => (s) => {
 	}
 }
 
-function addClient(user, info) {
+function addClient(type, user, info) {
 	try {
 		var client = findClient(user)
+		console.log(`### ${type} ${client ? 'MERGED' : 'ADDED'}: user=${JSON.stringify(user)} client=${JSON.stringify(client)}`)
 		if (client) {
 			client.sockets.push(info.ws)
 			return client
 		}
+		console.log('### CLIENTS:')
+		clients.forEach((c) => {
+			const us = clients.map((c) => c.user)
+			console.log(`### ${JSON.stringify(us)}`)
+		})
 		client = {
 			info: {
 				started: 0,
