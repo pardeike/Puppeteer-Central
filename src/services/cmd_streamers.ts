@@ -11,9 +11,11 @@ const link = (_ws) => {}
 
 const msg = (msg) => {
 	if (msg.type == 'streamers') {
-		streamers.set(msg.streamers)
+		console.log(`Streamers: ${JSON.stringify(msg.streamers)}`)
+		Mutate(streamers).set(msg.streamers)
 	}
 	if (msg.type == 'streamer') {
+		console.log(`Streamer: ${JSON.stringify(msg.streamer)}`)
 		const streamer = msg.streamer
 		const online = streamer.info.online
 

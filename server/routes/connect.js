@@ -46,7 +46,7 @@ async function helloGame(n, user, ws) {
 async function helloViewer(n, user, ws) {
 	if (debugCommands) console.log(`NEW VIEWER #${n} ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
 	let settings = await storage.read(user)
-	if (!settings.info) settings = defaultSettings
+	if (!settings || !settings.info) settings = defaultSettings
 	if (debugCommands) console.log(`#${n} settings: ${JSON.stringify(settings)}`)
 	const info = settings.info
 	if (debugCommands) console.log(`#${n} adding viewer ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
