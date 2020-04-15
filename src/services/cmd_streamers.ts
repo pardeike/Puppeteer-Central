@@ -11,15 +11,13 @@ const link = (_ws) => {}
 
 const msg = (msg) => {
 	if (msg.type == 'streamers') {
-		console.log(`Streamers: ${JSON.stringify(msg.streamers)}`)
 		Mutate(streamers).set(msg.streamers)
 	}
 	if (msg.type == 'streamer') {
-		console.log(`Streamer: ${JSON.stringify(msg.streamer)}`)
 		const streamer = msg.streamer
 		const online = streamer.info.online
 
-		const idx = streamers.value.findIndex((s) => s.id == streamer.info.id && s.service == streamer.info.service)
+		const idx = streamers.get().findIndex((s) => s.user.id == streamer.user.id && s.user.service == streamer.user.service)
 		if (idx >= 0) {
 			if (online) Mutate(streamers).update(idx, streamer)
 			else Mutate(streamers).remove(idx)
