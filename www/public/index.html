@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<link rel="icon" type="image/png" href="assets/icon.png" />
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700&display=swap" rel="stylesheet" />
+		<link rel="stylesheet" type="text/css" href="common.css" />
+		<title>Puppeteer Central</title>
+	</head>
+	<body onload="animatePuppet()">
+		<script>
+			function animatePuppet() {
+				var puppet = document.querySelector('#puppet')
+				var f = 0
+				setInterval(() => {
+					f += 0.2
+					var a = 3 + 4 * Math.sin(f)
+					puppet.style.webkitTransform = 'translate(100%, 0) rotate(' + a + 'deg)'
+				}, 50)
+			}
+
+			function login(service) {
+				document.location = `/auth/${service}`
+			}
+		</script>
+		<div id="header" style="grid-template-columns: auto auto auto auto auto auto">
+			<img id="home" class="selected" src="assets/home-selected.png" />
+			<div class="menu"><a href="about.html">About</a></div>
+			<div class="menu"><a href="terms.html">Terms</a></div>
+			<div class="menu"><a href="privacy.html">Privacy</a></div>
+			<div class="menu"><a href="contact.html">Contact</a></div>
+		</div>
+		<div id="container">
+			<div id="img">
+				<img id="logo" src="assets/puppeteer.jpg" />
+				<img id="puppet" src="assets/puppet.png" />
+			</div>
+			<div id="login">
+				<img onclick="login('twitch')" src="assets/sign-in-twitch.png" />
+				<img onclick="login('youtube')" src="assets/sign-in-youtube.png" />
+			</div>
+		</div>
+		<div id="footer">
+			©2019 Andreas Pardeike [Brrainz]
+		</div>
+	</body>
+</html>

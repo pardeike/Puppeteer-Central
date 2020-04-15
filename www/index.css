@@ -1,0 +1,52 @@
+#game {
+	position: absolute;
+	margin: 50px 20px 20px 20px;
+	width: calc(100% - 40px);
+	height: calc(100% - 70px);
+}
+.step {
+	padding: 1em !important;
+}
+.step:before {
+	font-size: 1.5em !important;
+	font-weight: bold;
+	margin-left: 0.2em !important;
+	margin-right: 0.5em !important;
+}
+.ui.attached:not(.message) + .ui.attached.segment:not(.top) {
+	border-top: 1px solid #d4d4d5 !important;
+	top: -1px;
+}
+.ui.grid > .column:not(.row) {
+	padding-top: 0.5rem !important;
+	padding-bottom: 0.5rem !important;
+}
+div.menu {
+	width: 100% !important;
+}
+.ui.dropdown .menu .selected.item,
+.ui.dropdown.selected {
+	background: rgba(39, 79, 118, 0.3) !important;
+}
+.ui.dropdown {
+	user-select: none;
+}
+.ui.dropdown .menu .item {
+	padding: 8px !important;
+	font-size: 1em;
+}
+.ui.tabular.menu .item {
+	padding: 10px;
+}
+element {
+	max-height: 400px;
+}
+.ui.selection.active.dropdown .menu {
+	max-height: 400px;
+}
+.bolder {
+	font-weight: bolder !important;
+}
+.hidden-menu {
+	display: none !important;
+}

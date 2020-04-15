@@ -1,0 +1,133 @@
+* {
+	padding: 0;
+	margin: 0;
+}
+span,
+div,
+b,
+input,
+textarea {
+	font-family: 'Open Sans', sans-serif !important;
+	font-weight: 400 !important;
+}
+b {
+	font-weight: 700 !important;
+}
+html,
+body {
+	height: 100%;
+	width: 100%;
+	position: relative;
+	background-color: #102030;
+}
+::selection {
+	background: white;
+}
+::-moz-selection {
+	background: white;
+}
+#container {
+	max-width: 80%;
+	width: 640px;
+	left: 50%;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+#content {
+	width: 80%;
+	padding: 20% 10% 20% 10%;
+	font-size: 1.2em;
+	line-height: 1.5em;
+	color: #dddddd;
+}
+#content h1 {
+	font-size: 1.5em;
+	font-weight: bold;
+	padding-bottom: 1em;
+}
+#img {
+	max-width: 100%;
+	position: relative;
+}
+#logo {
+	width: 100%;
+}
+#puppet {
+	left: 0;
+	position: absolute;
+	top: 0;
+	transform: translate(100%, 0) rotate(0turn);
+	height: 90%;
+}
+#login {
+	padding-top: 20px;
+	text-align: center;
+}
+#login img {
+	max-width: 48%;
+	display: inline;
+	cursor: pointer;
+}
+#login img:first-child {
+	padding-right: 1px;
+}
+#login img:last-child {
+	padding-left: 1px;
+}
+#header {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	font-size: 16px;
+	padding: 4px 8px 4px 4px;
+	background-color: #070f16;
+	display: grid;
+	grid-column-gap: 10px;
+	justify-content: left;
+	align-items: center;
+}
+#header div.menu {
+	color: #dddddd;
+	padding: 2px 6px 2px 6px;
+	cursor: pointer;
+	font-size: 12px;
+}
+#header div.menu a {
+	text-decoration: none;
+	color: #dddddd;
+	font-size: 12px;
+}
+#header div.selected,
+#header div.selected a {
+	color: orange;
+}
+#header .menu:hover {
+	background-color: #102030;
+}
+#header div.inactive {
+	color: gray;
+	cursor: default !important;
+	background-color: unset !important;
+}
+#home {
+	cursor: pointer;
+	margin-left: 6px;
+}
+#home:hover {
+	filter: opacity(0.5);
+}
+#home.selected:hover {
+	filter: opacity(1);
+}
+#footer {
+	color: #dddddd;
+	font-size: 12px;
+	position: absolute;
+	bottom: 0;
+	padding-top: 4px;
+	padding-bottom: 4px;
+	width: 100%;
+	text-align: center;
+}
