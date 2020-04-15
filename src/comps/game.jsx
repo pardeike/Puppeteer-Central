@@ -32,7 +32,13 @@ export default function Game() {
 		render: () => (enabled ? content : undefined),
 	})
 
-	if (!colonistLink.value.name) return <NoAssignment />
+	if (!colonistLink.value.name)
+		return (
+			<React.Fragment>
+				<GameHeader streamer={streamer} />
+				<NoAssignment />
+			</React.Fragment>
+		)
 
 	const panes = [
 		menu('state', true, <ColonistBasicCommands />),
