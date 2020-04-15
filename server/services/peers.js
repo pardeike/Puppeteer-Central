@@ -62,7 +62,7 @@ const safeSend = (msg) => (s) => {
 function addClient(type, user, info) {
 	try {
 		var client = findClient(user)
-		console.log(`### ${type} ${client ? 'MERGED' : 'ADDED'}: user=${JSON.stringify(user)} client=${JSON.stringify(client)}`)
+		console.log(`### ${type} ${client ? 'MERGED' : 'ADDED'}: user=${JSON.stringify(user)}`)
 		if (client) {
 			client.sockets.push(info.ws)
 			return client

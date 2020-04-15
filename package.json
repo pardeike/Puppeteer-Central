@@ -14,6 +14,7 @@
 	},
 	"dependencies": {
 		"@hookstate/core": "1.7.1",
+		"@hookstate/mutate": "1.2.3",
 		"@hookstate/persistence": "1.5.2",
 		"@rodw95/use-mounted-state": "0.0.1",
 		"bearer-token": "2.0.2",

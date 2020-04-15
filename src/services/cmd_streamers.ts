@@ -1,4 +1,5 @@
 import { createStateLink } from '@hookstate/core'
+import { Mutate } from '@hookstate/mutate'
 import stream from '../services/cmd_stream'
 import settings from './cmd_settings'
 
@@ -18,19 +19,17 @@ const msg = (msg) => {
 
 		const idx = streamers.value.findIndex((s) => s.id == streamer.info.id && s.service == streamer.info.service)
 		if (idx >= 0) {
-			if (online) streamers.value[idx] = streamer
-			else streamers.value.splice(idx, 1)
+			if (online) Mutate(streamers).update(idx, streamer)
+			else Mutate(streamers).remove(idx)
 		} else {
 			if (online) {
-				streamers.value.push(streamer)
+				Mutate(streamers).push(streamer)
 				const viewing = settings.ref.access().value.viewing
 				if (viewing && viewing.id == streamer.user.id && viewing.service == streamer.user.service) {
 					stream.join(viewing)
 				}
 			}
 		}
-
-		streamers.set(streamers.value)
 	}
 }
 
