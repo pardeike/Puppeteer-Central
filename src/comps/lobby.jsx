@@ -13,6 +13,13 @@ export default function Lobby() {
 		return window.screen.availWidth < 400
 	}
 
+	const joinStyle = {
+		cursor: 'pointer',
+		paddingLeft: 20,
+		paddingRight: 20,
+		float: 'right',
+	}
+
 	const Streamer = (prop) => {
 		const streamer = prop.streamer
 
@@ -30,6 +37,10 @@ export default function Lobby() {
 			return [pictureURL, '/i/preview.jpg']
 		}
 
+		const openStream = () => {
+			window.open(`https://twitch.tv/${streamer.user.name}`, '_blank')
+		}
+
 		return (
 			<Card>
 				<Image wrapped ui={false} onClick={() => commands.joinGame(streamer.user)} style={{ cursor: 'pointer' }}>
@@ -39,9 +50,10 @@ export default function Lobby() {
 					<Image floated="right" size="mini" src={streamer.user.picture} circular />
 					<Card.Header>
 						{streamer.user.service == 'twitch' ? (
-							<a href={`https://twitch.tv/${streamer.user.name}`} target="_blank" style={{ textDecoration: 'underline' }}>
-								{streamer.user.name}
-							</a>
+							<React.Fragment>
+								<span>{streamer.user.name}</span>
+								<img src="/i/link.png" style={{ paddingLeft: 10, paddingBottom: 3, cursor: 'pointer' }} onClick={() => openStream()} />
+							</React.Fragment>
 						) : (
 							streamer.user.name
 						)}
@@ -54,10 +66,13 @@ export default function Lobby() {
 				<Card.Content extra>
 					<Label size="mini">{streamer.viewers} viewers</Label>
 					{streamer.info.matureOnly && (
-						<Label floated="right" size="mini" color="red">
+						<Label size="mini" color="red">
 							Mature Chanell
 						</Label>
 					)}
+					<Label size="mini" color="green" style={joinStyle} onClick={() => commands.joinGame(streamer.user)}>
+						Join
+					</Label>
 				</Card.Content>
 			</Card>
 		)
