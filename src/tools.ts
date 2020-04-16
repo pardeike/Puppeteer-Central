@@ -2,7 +2,7 @@ import routesRef from './hooks/routes'
 import { v4 as uuidv4 } from 'uuid'
 import { BSON } from 'bsonfy'
 
-const version = 'v0.0.2'
+const version = 'v0.1.0'
 
 let _firstTime = true
 const firstTime = () => {
