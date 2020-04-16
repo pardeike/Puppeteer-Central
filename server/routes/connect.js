@@ -101,6 +101,7 @@ async function connect(ws, req) {
 				peers.assignment(client, msg.viewer, msg.state)
 				return
 
+			case 'game-info':
 			case 'earn':
 			case 'portrait':
 			case 'on-map':
@@ -117,6 +118,11 @@ async function connect(ws, req) {
 			case 'job':
 				if (debugCommands) console.log(`#${n} [game] ${msg.type} ${msg.id} ${msg.info}`)
 				peers.returnJobResult(client, msg.viewer, msg.id, msg.info)
+				return
+
+			case 'grid':
+				if (debugCommands) console.log(`#${n} [game] ${msg.type}`)
+				peers.grid(client, msg.controller, msg.info)
 				return
 		}
 		console.log(`#${n} [game] unknown message '${msg.type}'`)

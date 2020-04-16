@@ -1,7 +1,8 @@
 import React, { useEffect, createRef } from 'react'
-import { Dropdown, Image } from 'semantic-ui-react'
+import { Segment, Dropdown, Image } from 'semantic-ui-react'
 import { percentageBar, colorBar } from './bars'
 import { useStateLink } from '@hookstate/core'
+import NoAssignment from '../ux/no-assignment'
 import onmap from '../../services/cmd_on-map'
 import portrait from '../../services/cmd_portrait'
 import colonist from '../../services/cmd_colonist'
@@ -69,49 +70,53 @@ export default function ColonistOverview() {
 		if (canvasRef && canvasRef.current && colonistLink.value) updateCanvas()
 	})
 
+	if (!colonistLink.value.name) return <NoAssignment />
+
 	return (
-		<React.Fragment>
-			<div style={nGrid('auto 128px')}>
-				<div style={{ display: 'flex', flexWrap: 'wrap' }}>
-					<div style={colonistPortrait}>
-						<img src={portraitLink.value} style={colonistImage} />
-					</div>
-					<div>
-						<div>
-							<b>{colonistLink.value.name}</b>
+		<Segment.Group>
+			<Segment>
+				<div style={nGrid('auto 128px')}>
+					<div style={{ display: 'flex', flexWrap: 'wrap' }}>
+						<div style={colonistPortrait}>
+							<img src={portraitLink.value} style={colonistImage} />
 						</div>
-						{colonistLink.value.inspect.map((line, i) => (
-							<div key={i}>{DOMPurify.sanitize(line)}</div>
-						))}
+						<div>
+							<div>
+								<b>{colonistLink.value.name}</b>
+							</div>
+							{colonistLink.value.inspect.map((line, i) => (
+								<div key={i}>{DOMPurify.sanitize(line)}</div>
+							))}
+						</div>
+					</div>
+					<div style={{ position: 'relative', width: 128, height: 128 }}>
+						<Image src={onmap.ref.access().get()} style={{ position: 'absolute' }} />
+						<canvas ref={canvasRef} width="32" height="32" style={{ position: 'absolute', right: 2, bottom: 2 }}></canvas>
 					</div>
 				</div>
-				<div style={{ position: 'relative', width: 128, height: 128 }}>
-					<Image src={onmap.ref.access().get()} style={{ position: 'absolute' }} />
-					<canvas ref={canvasRef} width="32" height="32" style={{ position: 'absolute', right: 2, bottom: 2 }}></canvas>
+				<div style={{ ...nGrid('repeat(4, auto)'), paddingTop: '10px' }}>
+					{percentageBar(colonistLink.value.health, 'health')}
+					{percentageBar(colonistLink.value.mood, 'mood', 0.4)}
+					{colorBar(colonistLink.value.restrict, 'schedule')}
+					<Dropdown
+						icon={<div />}
+						trigger={colorBar(colonistLink.value.area, 'zone')}
+						options={getZoneOptions()}
+						value={colonistLink.value.area.label}
+						onChange={(_e, data) => commands.setZone(data.value)}
+					/>
 				</div>
-			</div>
-			<div style={{ ...nGrid('repeat(4, auto)'), paddingTop: '10px' }}>
-				{percentageBar(colonistLink.value.health, 'health')}
-				{percentageBar(colonistLink.value.mood, 'mood', 0.4)}
-				{colorBar(colonistLink.value.restrict, 'schedule')}
-				<Dropdown
-					icon={<div />}
-					trigger={colorBar(colonistLink.value.area, 'zone')}
-					options={getZoneOptions()}
-					value={colonistLink.value.area.label}
-					onChange={(_e, data) => commands.setZone(data.value)}
-				/>
-			</div>
-			{colonistLink.value.bleedingRate > 1 ? (
-				<div style={{ ...nGrid('auto auto'), paddingTop: '10px' }}>
-					<b>Bleeding: {colonistLink.value.bleedingRate}% per day</b>
-					{colonistLink.value.deathIn < 24 ? (
-						<b style={{ textAlign: 'right' }}>Death in {colonistLink.value.deathIn} hours</b>
-					) : (
-						<div style={{ textAlign: 'right' }}>No immediate danger</div>
-					)}
-				</div>
-			) : undefined}
-		</React.Fragment>
+				{colonistLink.value.bleedingRate > 1 ? (
+					<div style={{ ...nGrid('auto auto'), paddingTop: '10px' }}>
+						<b>Bleeding: {colonistLink.value.bleedingRate}% per day</b>
+						{colonistLink.value.deathIn < 24 ? (
+							<b style={{ textAlign: 'right' }}>Death in {colonistLink.value.deathIn} hours</b>
+						) : (
+							<div style={{ textAlign: 'right' }}>No immediate danger</div>
+						)}
+					</div>
+				) : undefined}
+			</Segment>
+		</Segment.Group>
 	)
 }

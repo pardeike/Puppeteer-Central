@@ -51,9 +51,15 @@ const publicClient = (c) => ({
 	viewers: c.viewers.length,
 })
 
-const safeSend = (msg) => (s) => {
+const safeSend = (msg, logSize) => (s) => {
 	try {
-		s.send(encode(msg))
+		if (logSize) {
+			const data = encode(msg)
+			console.log(`### ${data.length}`)
+			s.send(data)
+		} else {
+			s.send(encode(msg))
+		}
 	} catch (err) {
 		if (`${err}`.indexOf('(CLOSED)') == -1) console.log(`Send error: ${err}`)
 	}
@@ -296,6 +302,15 @@ function returnJobResult(client, viewer, id, info) {
 	}
 }
 
+function grid(client, viewer, info) {
+	try {
+		const json = { type: 'grid', info }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => c.sockets.forEach(safeSend(json)))
+	} catch (err) {
+		console.log(`### grid error: ${err}`)
+	}
+}
+
 module.exports = {
 	addClient,
 	addGame,
@@ -316,4 +331,5 @@ module.exports = {
 	setGameState,
 	runJob,
 	returnJobResult,
+	grid,
 }

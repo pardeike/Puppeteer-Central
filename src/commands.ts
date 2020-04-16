@@ -53,6 +53,14 @@ const tickSchedule = (idx, sched) => {
 	stream.state('schedule', `${idx}:${sched}`)
 }
 
+const setGridSize = (n) => {
+	stream.state('grid', `${n}`)
+}
+
+const goto = (px, pz) => {
+	stream.state('goto', `${px},${pz}`)
+}
+
 export default {
 	joinGame,
 	leaveGame,
@@ -61,4 +69,6 @@ export default {
 	setZone,
 	tickPriority,
 	tickSchedule,
+	setGridSize,
+	goto,
 }

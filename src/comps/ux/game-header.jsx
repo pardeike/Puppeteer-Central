@@ -3,12 +3,18 @@ import { Header, Button, Label, Image, Loader, Icon } from 'semantic-ui-react'
 import { useStateLink } from '@hookstate/core'
 import commands from '../../commands'
 import earn from '../../services/cmd_earn'
+import settings from '../../services/cmd_settings'
+import streamers from '../../services/cmd_streamers'
 import tools from '../../tools'
 
-export default function GameHeader(props) {
+export default function GameHeader() {
 	const earnLink = useStateLink(earn.ref)
+	const settingsLink = useStateLink(settings.ref)
+	const streamersLink = useStateLink(streamers.ref)
 
-	const streamer = props.streamer
+	const viewing = settingsLink.value.viewing
+	const streamer = viewing ? streamersLink.value.find((s) => s.user.id == viewing.id && s.user.service == viewing.service) : undefined
+
 	const streamerPic = streamer?.user.picture ?? tools.defaultAvatar
 
 	const imageStyle = {
@@ -46,7 +52,7 @@ export default function GameHeader(props) {
 					labelPosition="left"
 					style={{ backgroundColor: 'white', fontSize: '0.8em', paddingTop: '6px', paddingBottom: '3px' }}>
 					<Icon name="left arrow" />
-					<Image circular src={streamerPic} style={imageStyle} /> {streamer.user.name}
+					<Image circular src={streamerPic} style={imageStyle} /> {streamer?.user.name ?? ''}
 				</Button>
 			</Header>
 			<Label image circular style={coinLabelStyle}>

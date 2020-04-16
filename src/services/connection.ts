@@ -1,6 +1,8 @@
 import assignment from './cmd_assignment'
 import colonist from './cmd_colonist'
 import earn from './cmd_earn'
+import gameinfo from './cmd_game-info'
+import grid from './cmd_grid'
 import jobs from './cmd_jobs'
 import onmap from './cmd_on-map'
 import ping from './cmd_ping'
@@ -23,6 +25,8 @@ const connect = () => {
 		assignment.link(ws)
 		colonist.link(ws)
 		earn.link(ws)
+		gameinfo.link(ws)
+		grid.link(ws)
 		jobs.link(ws)
 		onmap.link(ws)
 		ping.link(ws)
@@ -37,6 +41,8 @@ const connect = () => {
 		assignment.remove(e)
 		colonist.remove(e)
 		earn.remove(e)
+		gameinfo.remove(e)
+		grid.remove(e)
 		jobs.remove(e)
 		onmap.remove(e)
 		ping.remove(e)
@@ -56,6 +62,8 @@ const connect = () => {
 		assignment.msg(msg)
 		colonist.msg(msg)
 		earn.msg(msg)
+		gameinfo.msg(msg)
+		grid.msg(msg)
 		jobs.msg(msg)
 		onmap.msg(msg)
 		ping.msg(msg)
