@@ -8,26 +8,29 @@ import togglesRef from '../hooks/toggles'
 
 export default function Settings01(props) {
 	const [token, setToken] = useState('')
-	const [gameHash, setGameHash] = useState('')
+	const [usageInfo, setUsageInfo] = useState(false)
 	const settingsLinks = useStateLink(settings.ref)
 	const togglesLinks = useStateLink(togglesRef)
 	const tokenPrefix = 'data:application/octet-stream,'
 	const tokenFilename = 'PuppeteerToken.txt'
 
-	const fetchToken = async () => {
+	const generateToken = async () => {
 		const response = await fetch('/game-token')
 		const info = await response.json()
 		setToken(info.token)
-		setGameHash(info.game)
+		settings.update('game', info.game)
+		setUsageInfo(true)
+	}
+
+	const dismissTokenInformation = () => {
+		setUsageInfo(false)
+		setToken('')
 	}
 
 	const revokeToken = async () => {
 		setToken('')
 		settings.update('game', '')
-	}
-
-	const useToken = () => {
-		settings.update('game', gameHash)
+		setUsageInfo(false)
 	}
 
 	const downloadTokenButton = () => {
@@ -74,18 +77,18 @@ export default function Settings01(props) {
 				<Segment.Group>
 					<Segment>
 						<p>In order to authorize your game and to connect it to this account, you need to install a token.</p>
-						<Button size="tiny" primary compact onClick={fetchToken} disabled={token ? true : false}>
+						<Button size="tiny" primary compact onClick={generateToken} disabled={usageInfo}>
 							Generate Game Token
 						</Button>
 					</Segment>
-					{token && (
+					{usageInfo && (
 						<Segment>
 							<p>Download {downloadTokenButton()} and place it in your RimWorld 'Config' directory:</p>
 							<Label style={box}>%LocalAppData%\..\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\Config</Label>
 							<p>
 								<span style={{ color: 'red' }}>Beware:</span> this file is very sensitive. Do not show or copy it to anybody else!
 							</p>
-							<Button size="tiny" primary compact onClick={useToken}>
+							<Button size="tiny" primary compact onClick={dismissTokenInformation}>
 								Done
 							</Button>
 						</Segment>
@@ -118,7 +121,7 @@ export default function Settings01(props) {
 			<Card.Content>
 				<Card.Header>Connecting RimWorld</Card.Header>
 				<Toggler settings={togglesLinks.nested.settings01}>
-					<Card.Description>{settingsLinks.nested.game.value ? revokeCard() : createTokenCard()}</Card.Description>
+					<Card.Description>{settingsLinks.nested.game.value && !usageInfo ? revokeCard() : createTokenCard()}</Card.Description>
 				</Toggler>
 			</Card.Content>
 		</Card>
