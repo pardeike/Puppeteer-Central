@@ -7,7 +7,6 @@ import settings from '../services/cmd_settings'
 import togglesRef from '../hooks/toggles'
 
 export default function Settings01(props) {
-	const [token, setToken] = useState('')
 	const [usageInfo, setUsageInfo] = useState(false)
 	const settingsLinks = useStateLink(settings.ref)
 	const togglesLinks = useStateLink(togglesRef)
@@ -17,43 +16,24 @@ export default function Settings01(props) {
 	const generateToken = async () => {
 		const response = await fetch('/game-token')
 		const info = await response.json()
-		setToken(info.token)
 		settings.update('game', info.game)
 		setUsageInfo(true)
+
+		const link = document.createElement('a')
+		link.download = tokenFilename
+		link.href = tokenPrefix + info.token
+		document.body.appendChild(link)
+		link.click()
+		document.body.removeChild(link)
 	}
 
 	const dismissTokenInformation = () => {
 		setUsageInfo(false)
-		setToken('')
 	}
 
 	const revokeToken = async () => {
-		setToken('')
 		settings.update('game', '')
 		setUsageInfo(false)
-	}
-
-	const downloadTokenButton = () => {
-		return (
-			<React.Fragment>
-				<style>{`
-					.download-link {
-						padding: 1px 3px 1px 3px;
-						background-color: #2185d0;
-						color: white;
-						font-size: 9pt;
-						cursor: pointer;
-					}
-					.download-link:hover {
-						background-color: #336890;
-						color: white;
-					}
-				`}</style>
-				<a className="download-link" download={tokenFilename} href={tokenPrefix + token}>
-					{tokenFilename}
-				</a>
-			</React.Fragment>
-		)
 	}
 
 	const box = {
@@ -61,6 +41,7 @@ export default function Settings01(props) {
 		fontSize: '9pt',
 		fontFamily: 'monospace',
 		marginBottom: '8px',
+		lineHeight: '1.6em',
 	}
 
 	const note = {
@@ -76,15 +57,21 @@ export default function Settings01(props) {
 				</Header>
 				<Segment.Group>
 					<Segment>
-						<p>In order to authorize your game and to connect it to this account, you need to install a token.</p>
+						<p>To connect your RimWorld game to this account you need to install a token file:</p>
 						<Button size="tiny" primary compact onClick={generateToken} disabled={usageInfo}>
 							Generate Game Token
 						</Button>
 					</Segment>
 					{usageInfo && (
 						<Segment>
-							<p>Download {downloadTokenButton()} and place it in your RimWorld 'Config' directory:</p>
-							<Label style={box}>%LocalAppData%\..\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\Config</Label>
+							<p>
+								<b>The token file is now downloading.</b> Place the file <b>PuppeteerToken.txt</b> in your RimWorld <b>Config</b> directory. No need to
+								restart RimWorld.
+							</p>
+							<p>To find the directory, copy this path to a file window:</p>
+							<Label style={box}>
+								<b>%LocalAppData%\..\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\Config</b>
+							</Label>
 							<p>
 								<span style={{ color: 'red' }}>Beware:</span> this file is very sensitive. Do not show or copy it to anybody else!
 							</p>

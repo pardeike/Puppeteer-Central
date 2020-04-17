@@ -1,3 +1,7 @@
+::selection {
+	background-color: black;
+	color: white;
+}
 #game {
 	position: absolute;
 	margin: 50px 20px 20px 20px;
