@@ -19,14 +19,15 @@ const send = (ws, type, obj) => {
 const uuid = () => uuidv4()
 
 const ago = (n) => {
-	var sec = Math.floor((Date.now() - n) / 1000),
-		min = 0,
-		hrs = 0
+	var sec = Math.floor((Date.now() - n) / 1000)
+	var min = 0
+	var hrs = 0
 	if (sec <= 0) return 'just now'
 	if (sec >= 60) {
 		min = Math.floor(sec / 60)
 		if (min >= 60) {
 			hrs = Math.floor(min / 60)
+			if (hrs > 0) sec -= 3600 * hrs
 			min -= hrs * 60
 		}
 		sec -= min * 60

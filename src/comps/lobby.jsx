@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useStateLink } from '@hookstate/core'
 import { Label, Card, Header, Segment, Image } from 'semantic-ui-react'
 import Img from 'react-image'
@@ -8,16 +8,39 @@ import tools from '../tools'
 
 export default function Lobby() {
 	const streamersLink = useStateLink(streamers.ref)
+	const [windowWidth, setWindowWidth] = useState(0)
 
-	const isMobileFormFactor = () => {
-		return window.screen.availWidth < 400
-	}
+	useEffect(() => {
+		const resizeWindow = () => setWindowWidth(window.innerWidth)
+		resizeWindow()
+		window.addEventListener('resize', resizeWindow)
+		return () => window.removeEventListener('resize', resizeWindow)
+	}, [])
+
+	const isMobileFormFactor = windowWidth < 650
+	const rowCount = isMobileFormFactor ? 1 : 2
+
+	let w = windowWidth
+	if (!isMobileFormFactor) w /= 2
+	const buttonSize = w < 420 ? (w < 365 ? 'tiny' : 'small') : 'large'
 
 	const joinStyle = {
 		cursor: 'pointer',
-		paddingLeft: 20,
-		paddingRight: 20,
-		float: 'right',
+		paddingLeft: '24px',
+		paddingRight: '24px',
+		justifySelf: 'end',
+	}
+
+	const minButton = {
+		whiteSpace: 'nowrap',
+		paddingLeft: '14px',
+		paddingRight: '14px',
+	}
+
+	const buttonGrid = {
+		display: 'grid',
+		gridColumnGap: '4px',
+		gridTemplateColumns: 'auto auto minmax(1%,90%) auto',
 	}
 
 	const Streamer = (prop) => {
@@ -64,15 +87,22 @@ export default function Lobby() {
 					</Card.Description>
 				</Card.Content>
 				<Card.Content extra>
-					<Label size="mini">{streamer.viewers} viewers</Label>
-					{streamer.info.matureOnly && (
-						<Label size="mini" color="red">
-							Mature Chanell
+					<div style={buttonGrid}>
+						<Label size={buttonSize} style={minButton}>
+							{streamer.viewers} Viewers
 						</Label>
-					)}
-					<Label size="mini" color="green" style={joinStyle} onClick={() => commands.joinGame(streamer.user)}>
-						Join
-					</Label>
+						{streamer.info.matureOnly ? (
+							<Label size={buttonSize} color="red" style={minButton}>
+								Mature Content
+							</Label>
+						) : (
+							<div style={minButton} />
+						)}
+						<div />
+						<Label size={buttonSize} color="green" style={joinStyle} onClick={() => commands.joinGame(streamer.user)}>
+							Join
+						</Label>
+					</div>
 				</Card.Content>
 			</Card>
 		)
@@ -82,7 +112,7 @@ export default function Lobby() {
 		<React.Fragment>
 			<Header style={{ color: 'white', fontWeight: '700' }}>Available Games</Header>
 			<Segment basic>
-				<Card.Group itemsPerRow={isMobileFormFactor() ? 1 : 2} style={{ margin: '-2em', marginTop: '-1em' }}>
+				<Card.Group itemsPerRow={rowCount} style={{ margin: '-2em', marginTop: '-1em' }}>
 					{streamersLink.value.map((streamer) => (
 						<Streamer key={`${streamer.user.id}:${streamer.user.service}`} streamer={streamer} />
 					))}
