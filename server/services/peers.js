@@ -70,6 +70,7 @@ function addClient(type, user, info) {
 		var client = findClient(user)
 		console.log(`### ${type} ${client ? 'MERGED' : 'ADDED'}: user=${JSON.stringify(user)}`)
 		if (client) {
+			client.user = user // refresh picture for example
 			client.sockets.push(info.ws)
 			return client
 		}
