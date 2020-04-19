@@ -53,12 +53,7 @@ export default function Settings04(props) {
 											<Table.Row key={colonist.id}>
 												<Table.Cell>{colonist.name}</Table.Cell>
 												<Table.Cell>
-													<Viewer
-														viewer={colonist.controller}
-														lastSeen={colonist.lastSeen}
-														assign={assignViewer(colonist.id)}
-														remove={removeViewer(colonist.id)}
-													/>
+													<Viewer viewer={colonist.controller} assign={assignViewer(colonist.id)} remove={removeViewer(colonist.id)} />
 												</Table.Cell>
 											</Table.Row>
 										))}

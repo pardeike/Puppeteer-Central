@@ -96,7 +96,7 @@ export default function Viewer(props) {
 			{props.viewer ? (
 				<React.Fragment>
 					<img src="/i/delete.png" style={{ float: 'right', cursor: 'pointer', paddingRight: '12px' }} onClick={() => props.remove()} />
-					<Image src={props.viewer.picture} avatar style={avatarStyle(18)} /> {props.viewer.name} {props.lastSeen}
+					<Image src={props.viewer.picture} avatar style={avatarStyle(18)} /> {props.viewer.name}
 				</React.Fragment>
 			) : (
 				''
