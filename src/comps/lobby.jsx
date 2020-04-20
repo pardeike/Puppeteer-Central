@@ -54,8 +54,7 @@ export default function Lobby() {
 					pictureURL = `https://static-cdn.jtvnw.net/previews-ttv/live_user_${lowerName}-320x180.jpg`
 					break
 				case 'youtube':
-					// YouTube review not completed
-					// pictureURL = `/youtube-preview/${user.id}`
+					pictureURL = `/youtube-preview/${user.id}`
 					break
 			}
 			return [pictureURL, '/i/preview.jpg']

@@ -14,11 +14,7 @@ function register(app) {
 	app.get(
 		'/auth/youtube',
 		passport.authenticate('youtube', {
-			scope: [
-				'openid',
-				'profile',
-				/*'https://www.googleapis.com/auth/youtube.readonly'*/
-			],
+			scope: ['email', 'openid', 'profile', 'https://www.googleapis.com/auth/youtube.readonly'],
 		}),
 		login
 	)
