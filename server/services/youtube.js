@@ -3,18 +3,13 @@ const querystring = require('querystring')
 const YoutubeV3Strategy = require('passport-youtube-v3').Strategy
 
 async function verifyToken(token) {
-	const url = `https://www.googleapis.com/youtube/v3/channels?part=id&mine=true&maxResults=1`
+	const url = ` https://www.googleapis.com/oauth2/v1/userinfo`
 	const response = await fetch(url, {
 		headers: {
-			Authorization: 'Bearer ' + token
-		}
+			Authorization: 'Bearer ' + token,
+		},
 	})
-	const result = await response.json()
-	if (result.error) {
-		console.log(`YouTube Verification returned error ${result.error.code}: ${result.error.errors[0].message}`)
-		return ''
-	}
-	return result.items[0].id
+	return await response.json()
 }
 
 const strategy = new YoutubeV3Strategy(
@@ -22,23 +17,23 @@ const strategy = new YoutubeV3Strategy(
 		clientID: process.env.YOUTUBE_OAUTH_TEST_APP_CLIENT_ID,
 		clientSecret: process.env.YOUTUBE_OAUTH_TEST_APP_CLIENT_SECRET,
 		callbackURL: process.env.YOUTUBE_CALLBACK,
-		scope: 'https://www.googleapis.com/auth/youtube.readonly'
+		scope: ['email', 'openid', 'profile', 'https://www.googleapis.com/auth/youtube.readonly'],
 	},
 	async (accessToken, _refreshToken, profile, cb) => {
-		const id = await verifyToken(accessToken)
-		if (profile.id == id) {
-			cb(undefined, {
-				id: profile.id,
-				name: profile.displayName,
-				picture: profile._json.items[0].snippet.thumbnails.high.url,
-				service: 'youtube'
-			})
+		const identity = await verifyToken(accessToken)
+		if (!identity) {
+			console.log(`Users YouTube token does not work`)
 			return
 		}
-		console.log(`Users YouTube IDs do not match (${profile.id} != ${id})`)
+		cb(undefined, {
+			id: identity.id,
+			name: identity.name,
+			picture: identity.picture,
+			service: 'youtube',
+		})
 	}
 )
 
 module.exports = {
-	strategy
+	strategy,
 }
