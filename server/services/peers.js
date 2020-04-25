@@ -64,7 +64,7 @@ const safeClientSend = (client, msg, skipable) => {
 					const state = user.stalled ? 'stalled' : 'stopped stalling'
 					console.log(`Socket ${n} for ${user.name}:${user.service} ${state}`)
 					var streamer = findClient(user)
-					if (streamer) safeSend({ type: 'stalling', viewer: publicUser(user), state })(streamer.server)
+					if (streamer) safeSend({ type: 'stalling', viewer: publicUser(user), state: user.stalled })(streamer.server)
 				}
 			}
 			if (!skipable || s.bufferedAmount == 0) s.send(encode(msg))
