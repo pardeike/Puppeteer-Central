@@ -172,9 +172,17 @@ async function connect(ws, req) {
 	}
 
 	ws.on('message', async (e) => {
-		msg = parse(e)
-		if (msg.type == 'ping') return
-		user.game ? gameMessage(msg) : clientMessage(msg)
+		try {
+			const msg = parse(e)
+			if (!msg) {
+				console.log(`#${n} invalid bson message`)
+				return
+			}
+			if (msg.type == 'ping') return
+			user.game ? gameMessage(msg) : clientMessage(msg)
+		} catch (err) {
+			console.log(`#${n} message error: ${err}`)
+		}
 	})
 
 	ws.on('close', () => {
