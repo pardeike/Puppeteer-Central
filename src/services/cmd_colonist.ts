@@ -28,6 +28,7 @@ const initialValue = {
 	deathIn: 0,
 	injuries: [],
 	skills: [],
+	traits: [],
 }
 const ref = createStateLink(initialValue)
 const flagsRef = createStateLink(initialFlags)
