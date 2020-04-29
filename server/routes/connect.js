@@ -4,7 +4,8 @@ const tools = require('../services/tools')
 const { encode, parse } = require('../services/bson')
 
 var counter = 0
-var debugCommands = true
+var debugMainCommands = true
+var debugCommonCommands = false
 
 var defaultSettings = {
 	game: undefined,
@@ -22,10 +23,10 @@ async function helloGame(n, user, ws) {
 		console.log(`#${n} game not whitelisted`)
 		return undefined
 	}
-	if (debugCommands) console.log(`NEW GAME #${n} ${user.service}:${user.id}:${user.game}`)
+	if (debugMainCommands) console.log(`NEW GAME #${n} ${user.service}:${user.id}:${user.game}`)
 	var client = peers.findClient(user)
 	if (!client) {
-		if (debugCommands) console.log(`#${n} adding default viewer`)
+		if (debugMainCommands) console.log(`#${n} adding default viewer`)
 		client = peers.addClient('GAME', user, {
 			ws: undefined,
 			online: settings.info.online,
@@ -37,19 +38,19 @@ async function helloGame(n, user, ws) {
 			return undefined
 		}
 	}
-	if (debugCommands) console.log(`#${n} adding game`)
+	if (debugMainCommands) console.log(`#${n} adding game`)
 	peers.addGame(client, ws)
 	ws.sendEncoded({ type: 'welcome' })
 	return client
 }
 
 async function helloViewer(n, user, ws) {
-	if (debugCommands) console.log(`NEW VIEWER #${n} ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
+	if (debugMainCommands) console.log(`NEW VIEWER #${n} ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
 	let settings = await storage.read(user)
 	if (!settings || !settings.info) settings = defaultSettings
-	if (debugCommands) console.log(`#${n} settings: ${JSON.stringify(settings)}`)
+	if (debugCommonCommands) console.log(`#${n} settings: ${JSON.stringify(settings)}`)
 	const info = settings.info
-	if (debugCommands) console.log(`#${n} adding viewer ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
+	if (debugMainCommands) console.log(`#${n} adding viewer ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
 	const client = peers.addClient('VIEWER', user, {
 		ws,
 		online: info.online,
@@ -92,12 +93,12 @@ async function connect(ws, req) {
 	const gameMessage = async (msg) => {
 		switch (msg.type) {
 			case 'colonists':
-				if (debugCommands) console.log(`#${n} [game] ${msg.type} ${JSON.stringify(msg.colonists)}`)
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${JSON.stringify(msg.colonists)}`)
 				peers.colonists(client, msg.colonists)
 				return
 
 			case 'assignment':
-				if (debugCommands) console.log(`#${n} [game] ${msg.type} ${msg.viewer.service}:${msg.viewer.id} ${msg.state}`)
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.viewer.service}:${msg.viewer.id} ${msg.state}`)
 				peers.assignment(client, msg.viewer, msg.state)
 				return
 
@@ -106,22 +107,22 @@ async function connect(ws, req) {
 			case 'portrait':
 			case 'on-map':
 			case 'colonist-basics':
-				// if (debugCommands) console.log(`#${n} [game] ${msg.type} ${msg.info}`)
+				// if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.info}`)
 				peers.gameMessage(msg.type, msg.viewer, msg.info)
 				return
 
 			case 'state':
-				if (debugCommands) console.log(`#${n} [game] ${msg.type} ${msg.key} ${JSON.stringify(msg.val)}`)
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.key} ${JSON.stringify(msg.val)}`)
 				peers.setClientState(client, msg.viewer, msg.key, msg.val)
 				return
 
 			case 'job':
-				if (debugCommands) console.log(`#${n} [game] ${msg.type} ${msg.id} ${msg.info}`)
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.id} ${msg.info}`)
 				peers.returnJobResult(client, msg.viewer, msg.id, msg.info)
 				return
 
 			case 'grid':
-				if (debugCommands) console.log(`#${n} [game] ${msg.type}`)
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type}`)
 				peers.grid(client, msg.controller, msg.info)
 				return
 		}
@@ -131,18 +132,18 @@ async function connect(ws, req) {
 	const clientMessage = async (msg) => {
 		switch (msg.type) {
 			case 'join':
-				if (debugCommands) console.log(`#${n} [client] ${msg.type} ${JSON.stringify(msg.user)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${JSON.stringify(msg.user)}`)
 				peers.leave(client)
 				peers.join(client, msg.user)
 				return
 
 			case 'leave':
-				if (debugCommands) console.log(`#${n} [client] ${msg.type}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type}`)
 				peers.leave(client)
 				return
 
 			case 'settings':
-				if (debugCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} => ${JSON.stringify(msg.val)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} => ${JSON.stringify(msg.val)}`)
 				await storage.set(user, msg.key, msg.val)
 				if (msg.key == 'info') {
 					client.info = tools.merge(client.info, msg.val)
@@ -154,17 +155,17 @@ async function connect(ws, req) {
 				return
 
 			case 'assign':
-				if (debugCommands) console.log(`#${n} [client] ${msg.type} ${msg.colonistID} ${JSON.stringify(msg.viewer)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.colonistID} ${JSON.stringify(msg.viewer)}`)
 				peers.assign(client, msg.colonistID, msg.viewer)
 				return
 
 			case 'state':
-				if (debugCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} ${JSON.stringify(msg.val)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} ${JSON.stringify(msg.val)}`)
 				peers.setGameState(client, msg.key, msg.val)
 				return
 
 			case 'job':
-				if (debugCommands) console.log(`#${n} [client] ${msg.type} ${msg.id} ${msg.method} ${JSON.stringify(msg.args)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.id} ${msg.method} ${JSON.stringify(msg.args)}`)
 				peers.runJob(client, msg.id, msg.method, msg.args)
 				return
 		}
@@ -186,7 +187,7 @@ async function connect(ws, req) {
 	})
 
 	ws.on('close', () => {
-		if (debugCommands) console.log(`#${n} closed`)
+		if (debugMainCommands) console.log(`#${n} closed`)
 		user.game ? peers.removeGame(ws) : peers.removeClient(ws)
 	})
 }

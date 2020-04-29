@@ -64,7 +64,7 @@ const safeClientSend = (client, msg, skipable) => {
 					const state = user.stalled ? 'stalled' : 'stopped stalling'
 					console.log(`Socket ${n} for ${user.name}:${user.service} ${state}`)
 					var streamer = findClient(user)
-					if (streamer) safeSend({ type: 'stalling', viewer: publicUser(user), state: user.stalled })(streamer.server)
+					if (streamer && streamer.server) safeSend({ type: 'stalling', viewer: publicUser(user), state: user.stalled })(streamer.server)
 				}
 			} else {
 				if (!user) console.log('safeClientSend called with undefined usser')
@@ -303,7 +303,7 @@ function setGameState(client, key, val) {
 		clients
 			.filter((c) => c.viewers.indexOf(client) != -1)
 			.forEach((streamer) => {
-				safeSend({ type: 'state', user: userId(client.user), key, val })(streamer.server)
+				if (streamer.server) safeSend({ type: 'state', user: userId(client.user), key, val })(streamer.server)
 			})
 	} catch (err) {
 		console.log(`### setGameState error: ${err}`)
@@ -315,7 +315,7 @@ function runJob(client, id, method, args) {
 		clients
 			.filter((c) => c.viewers.indexOf(client) != -1)
 			.forEach((streamer) => {
-				safeSend({ type: 'job', user: userId(client.user), id, method, args })(streamer.server)
+				if (streamer.server) safeSend({ type: 'job', user: userId(client.user), id, method, args })(streamer.server)
 			})
 	} catch (err) {
 		console.log(`### runJob error: ${err}`)
