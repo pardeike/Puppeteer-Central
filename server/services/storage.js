@@ -6,7 +6,7 @@ const password = process.env.MONGO_DB_PASSWORD
 const hosts = process.env.MONGO_DB_HOST
 const dbname = process.env.MONGO_DB_DATABASE
 const replica = process.env.MONGO_DB_REPLICA_SET
-const uri = `mongodb://${username}:${password}@${hosts}/${dbname}?authSource=${dbname}&replicaSet=${replica}&retryWrites=false`
+const uri = 'mongodb://localhost:27017/puppeteer' //`mongodb://${username}:${password}@${hosts}/${dbname}?authSource=${dbname}&replicaSet=${replica}&retryWrites=false`
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 var settings = undefined

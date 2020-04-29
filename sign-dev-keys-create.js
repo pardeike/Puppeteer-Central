@@ -2,5 +2,5 @@ const fs = require('fs')
 const keypair = require('keypair')
 
 const pair = keypair()
-fs.writeFileSync(pair.private, 'sign.priv.dev')
-fs.writeFileSync(pair.public, 'sign.pub.dev')
+fs.writeFileSync('sign.priv.dev', pair.private)
+fs.writeFileSync('sign.pub.dev', pair.public)
