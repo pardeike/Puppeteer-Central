@@ -3,6 +3,8 @@ const storage = require('../services/storage')
 const tools = require('../services/tools')
 const { encode, parse } = require('../services/bson')
 
+const minimumModVersion = '0.1.3.0'
+
 var counter = 0
 var debugMainCommands = true
 var debugCommonCommands = false
@@ -40,7 +42,7 @@ async function helloGame(n, user, ws) {
 	}
 	if (debugMainCommands) console.log(`#${n} adding game`)
 	peers.addGame(client, ws)
-	ws.sendEncoded({ type: 'welcome' })
+	ws.sendEncoded({ type: 'welcome', minVersion: minimumModVersion })
 	return client
 }
 
