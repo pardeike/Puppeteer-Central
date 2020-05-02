@@ -13,6 +13,8 @@ const initialValue = {
 	y: 0,
 	mx: 0,
 	my: 0,
+	childhood: [],
+	adulthood: [],
 	inspect: [],
 	health: { label: '', percent: 0 },
 	mood: { label: '', percent: 0 },
@@ -28,6 +30,7 @@ const initialValue = {
 	deathIn: 0,
 	injuries: [],
 	skills: [],
+	incapable: [],
 	traits: [],
 }
 const ref = createStateLink(initialValue)

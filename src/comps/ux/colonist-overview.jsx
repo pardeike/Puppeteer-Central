@@ -33,6 +33,7 @@ export default function ColonistOverview() {
 		height: '64px',
 		marginRight: '10px',
 		textAlign: 'center',
+		position: 'relative',
 	}
 
 	const colonistImage = {
@@ -40,6 +41,14 @@ export default function ColonistOverview() {
 		maxHeight: 56,
 		margin: 4,
 		backgroundColor: 'transparent',
+	}
+
+	const draft = {
+		position: 'absolute',
+		top: 2,
+		left: 2,
+		width: 16,
+		height: 16,
 	}
 
 	const getZoneOptions = () => {
@@ -78,15 +87,18 @@ export default function ColonistOverview() {
 				<div style={nGrid('auto 128px')}>
 					<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 						<div style={colonistPortrait}>
+							{colonistLink.value.drafted && <img src="/i/drafted.png" style={draft} />}
 							<img src={portraitLink.value} style={colonistImage} />
 						</div>
 						<div>
 							<div>
 								<b>{colonistLink.value.name}</b>
 							</div>
-							{colonistLink.value.inspect.map((line, i) => (
-								<div key={i}>{DOMPurify.sanitize(line)}</div>
-							))}
+							{colonistLink.value.inspect
+								.filter((_line, i) => i != 0)
+								.map((line, i) => (
+									<div key={i}>{DOMPurify.sanitize(line)}</div>
+								))}
 						</div>
 					</div>
 					<div style={{ position: 'relative', width: 128, height: 128 }}>
