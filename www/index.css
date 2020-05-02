@@ -1,3 +1,6 @@
+* {
+	user-select: none;
+}
 ::selection {
 	background-color: black;
 	color: white;
@@ -32,9 +35,6 @@ div.menu {
 .ui.dropdown .menu .selected.item,
 .ui.dropdown.selected {
 	background: rgba(39, 79, 118, 0.3) !important;
-}
-.ui.dropdown {
-	user-select: none;
 }
 .ui.dropdown .menu .item {
 	padding: 8px !important;

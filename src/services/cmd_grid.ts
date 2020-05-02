@@ -1,16 +1,26 @@
 import { createStateLink } from '@hookstate/core'
 import tools from '../tools'
+import commands from '../commands'
 
 var ws = undefined
-var gridScale = 12
+const initialRadius = 4
+
+const gridFrame = {
+	x1: -1,
+	z1: -1,
+	x2: -1,
+	z2: -1,
+	inited: false,
+}
+const frameRef = createStateLink(gridFrame)
 
 const initialValue = {
 	px: 0,
 	pz: 0,
 	val: [],
+	counter: 0,
 }
 const ref = createStateLink(initialValue)
-const scaleRef = createStateLink(gridScale)
 
 const link = (_ws) => {
 	ws = _ws
@@ -18,7 +28,23 @@ const link = (_ws) => {
 
 const msg = (msg) => {
 	if (msg.type == 'grid') {
+		msg.info.counter = ref.access().nested.counter.value + 1
 		ref.access().set(msg.info)
+		const px = msg.info.px
+		const pz = msg.info.pz
+		let f = frameRef.access().get()
+		if (f.inited == false) {
+			f = {
+				x1: px - initialRadius,
+				z1: pz - initialRadius,
+				x2: px + initialRadius,
+				z2: pz + initialRadius,
+				inited: true,
+			}
+			console.log(`GRID SET ${px},${pz} FRAME= ${f.x1},${f.z1} - ${f.x2},${f.z2}`)
+			frameRef.access().set(f)
+			commands.setGridPosition(f)
+		}
 	}
 }
 
@@ -32,7 +58,7 @@ const draftTo = (x, z) => {
 
 export default {
 	ref,
-	scaleRef,
+	frameRef,
 	link,
 	msg,
 	remove,
