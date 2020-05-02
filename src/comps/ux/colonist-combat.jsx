@@ -1,12 +1,14 @@
 import React, { useEffect, createRef, useState } from 'react'
+import { Menu, Popup } from 'semantic-ui-react'
 import { useStateLink } from '@hookstate/core'
 import commands from '../../commands'
 import colonist from '../../services/cmd_colonist'
 import grid from '../../services/cmd_grid'
+import menu from '../../services/cmd_menu'
 import gameinfo from '../../services/cmd_game-info'
 import TransformRecognizer from '../../services/transform-recogniser'
 import delay from '../../services/delay'
-import { Button, Container } from 'semantic-ui-react'
+import { Button } from 'semantic-ui-react'
 
 const cellSize = 24
 const cellSizeHalf = cellSize / 2
@@ -24,6 +26,7 @@ export default function ColonistCombat() {
 	const colonistLink = useStateLink(colonist.ref)
 	const gridLink = useStateLink(grid.ref)
 	const frameLink = useStateLink(grid.frameRef)
+	const menuLink = useStateLink(menu.ref)
 	const [eventHandlerAdded, setEventHandlerAdded] = useState(false)
 	const [autoFollow, setAutoFollow] = useState(true)
 
@@ -35,7 +38,6 @@ export default function ColonistCombat() {
 	const pz = gridLink.nested.pz.value
 	const gridCounter = gridLink.nested.counter.value
 	const frame = frameLink.value
-	console.log(`INIT FRAME= ${frame.x1},${frame.z1} - ${frame.x2},${frame.z2}`)
 
 	let angle = undefined
 	if (px < frame.x1 || px > frame.x2 || pz < frame.z1 || pz > frame.z2) {
@@ -60,7 +62,6 @@ export default function ColonistCombat() {
 					z2: old.z2 - 1,
 					inited: true,
 				}
-				console.log(`FRAME= ${f.x1},${f.z1} - ${f.x2},${f.z2}`)
 				frameLink.access().set(f)
 				commands.setGridPosition(f)
 			}
@@ -73,7 +74,6 @@ export default function ColonistCombat() {
 					z2: old.z2 + 1,
 					inited: true,
 				}
-				console.log(`FRAME= ${f.x1},${f.z1} - ${f.x2},${f.z2}`)
 				frameLink.access().set(f)
 				commands.setGridPosition(f)
 			}
@@ -105,7 +105,6 @@ export default function ColonistCombat() {
 			z2: frameLink.nested.z2.value + dy,
 			inited: true,
 		}
-		console.log(`FRAME= ${f.x1},${f.z1} - ${f.x2},${f.z2}`)
 		frameLink.access().set(f)
 		commands.setGridPosition(f)
 	}
@@ -205,11 +204,12 @@ export default function ColonistCombat() {
 				const fx = (evt.clientX - canvasX) / canvasWidth
 				const fz = 1 - (evt.clientY - canvasY) / canvasHeight
 				const r = frame
-				console.log('frame', r.x1, r.z1, r.x2, r.z2)
 				const x = r.x1 + Math.floor((r.x2 - r.x1 + 1) * fx)
 				const z = r.z1 + Math.floor((r.z2 - r.z1 + 1) * fz)
-				console.log('%', fx * 100, fz * 100, x, z)
-				commands.goto(x, z)
+
+				if (evt.shiftKey) commands.goto(x, z)
+				else commands.menu(x, z)
+
 				return false
 			})
 			const recognizer = new TransformRecognizer(canvas)
@@ -249,25 +249,54 @@ export default function ColonistCombat() {
 		borderRadius: '100%',
 	}
 
+	const getMenuOptions = () => {
+		return menuLink.value.map((choice) => ({
+			key: choice.id,
+			content: choice.label,
+			value: choice.id,
+		}))
+	}
+
+	const popupStyle = {
+		position: 'relative',
+		left: '10px',
+		top: '30px',
+	}
+
 	return (
 		<React.Fragment>
-			<Container style={{ paddingTop: 10, paddingBottom: 10, textAlign: 'right' }}>
-				{colonistLink.value.drafted && (
-					<Button size="mini" color="green" onClick={() => commands.setDraftModus(false)}>
-						Undraft
-					</Button>
-				)}
+			<div style={{ paddingTop: 10, paddingBottom: 10, textAlign: 'right' }}>
+				<Button
+					size="mini"
+					color={colonistLink.value.drafted ? 'red' : 'green'}
+					onClick={() => {
+						commands.setDraftModus(!colonistLink.value.drafted)
+					}}>
+					{colonistLink.value.drafted ? 'Undraft' : 'Draft'}
+				</Button>
 				&nbsp;
 				<Button size="mini" color="blue" disabled={autoFollow} onClick={() => setAutoFollow(true)}>
 					Follow
 				</Button>
-			</Container>
+			</div>
 			<canvas ref={canvasRef} width={size} height={size} style={{ cursor: 'pointer', width: '100%', height: '100%' }} />
 			{angle !== undefined && (
 				<div style={direction}>
 					<div style={marker}>➜</div>
 				</div>
 			)}
+			<Popup context={canvasRef} size="mini" style={popupStyle} onClose={() => menuLink.access().set([])} open={menuLink.value.length > 0}>
+				<Menu
+					items={getMenuOptions()}
+					onItemClick={(_e, data) => {
+						commands.action(data.value)
+						menuLink.access().set([])
+					}}
+					style={{ width: '75% !important' }}
+					secondary
+					vertical
+				/>
+			</Popup>
 		</React.Fragment>
 	)
 }

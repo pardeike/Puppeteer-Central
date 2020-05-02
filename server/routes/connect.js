@@ -125,6 +125,11 @@ async function connect(ws, req) {
 				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type}`)
 				peers.grid(client, msg.controller, msg.info)
 				return
+
+			case 'menu':
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type}`)
+				peers.menu(client, msg.controller, msg.choices)
+				return
 		}
 		console.log(`#${n} [game] unknown message '${msg.type}'`)
 	}

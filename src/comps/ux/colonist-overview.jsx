@@ -43,13 +43,13 @@ export default function ColonistOverview() {
 	}
 
 	const getZoneOptions = () => {
-		const chocies = stateLink.value.zones.map((z) => ({
+		const choices = stateLink.value.zones.map((z) => ({
 			key: z,
 			text: z,
 			value: z,
 		}))
-		chocies.unshift({ key: '', text: 'Unrestricted', value: '' })
-		return chocies
+		choices.unshift({ key: '', text: 'Unrestricted', value: '' })
+		return choices
 	}
 
 	useEffect(() => {

@@ -65,6 +65,14 @@ const goto = (px, pz) => {
 	stream.state('goto', `${px},${pz}`)
 }
 
+const menu = (px, pz) => {
+	stream.state('menu', `${px},${pz}`)
+}
+
+const action = (id) => {
+	stream.state('action', id)
+}
+
 export default {
 	joinGame,
 	leaveGame,
@@ -76,4 +84,6 @@ export default {
 	requestGrid,
 	setGridPosition,
 	goto,
+	menu,
+	action,
 }

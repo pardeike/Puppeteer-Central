@@ -340,6 +340,15 @@ function grid(client, viewer, info) {
 	}
 }
 
+function menu(client, viewer, choices) {
+	try {
+		const json = { type: 'menu', choices }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => safeClientSend(c, json, true))
+	} catch (err) {
+		console.log(`### menu error: ${err}`)
+	}
+}
+
 module.exports = {
 	addClient,
 	addGame,
@@ -361,4 +370,5 @@ module.exports = {
 	runJob,
 	returnJobResult,
 	grid,
+	menu,
 }

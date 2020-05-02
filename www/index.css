@@ -32,6 +32,9 @@
 div.menu {
 	width: 100% !important;
 }
+.ui.popup .menu .item {
+	width: max-content;
+}
 .ui.dropdown .menu .selected.item,
 .ui.dropdown.selected {
 	background: rgba(39, 79, 118, 0.3) !important;

@@ -4,6 +4,7 @@ import earn from './cmd_earn'
 import gameinfo from './cmd_game-info'
 import grid from './cmd_grid'
 import jobs from './cmd_jobs'
+import menu from './cmd_menu'
 import onmap from './cmd_on-map'
 import ping from './cmd_ping'
 import portrait from './cmd_portrait'
@@ -28,6 +29,7 @@ const connect = () => {
 		gameinfo.link(ws)
 		grid.link(ws)
 		jobs.link(ws)
+		menu.link(ws)
 		onmap.link(ws)
 		ping.link(ws)
 		portrait.link(ws)
@@ -44,6 +46,7 @@ const connect = () => {
 		gameinfo.remove(e)
 		grid.remove(e)
 		jobs.remove(e)
+		menu.remove(e)
 		onmap.remove(e)
 		ping.remove(e)
 		portrait.remove(e)
@@ -65,6 +68,7 @@ const connect = () => {
 		gameinfo.msg(msg)
 		grid.msg(msg)
 		jobs.msg(msg)
+		menu.msg(msg)
 		onmap.msg(msg)
 		ping.msg(msg)
 		portrait.msg(msg)

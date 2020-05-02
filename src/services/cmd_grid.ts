@@ -41,7 +41,6 @@ const msg = (msg) => {
 				z2: pz + initialRadius,
 				inited: true,
 			}
-			console.log(`GRID SET ${px},${pz} FRAME= ${f.x1},${f.z1} - ${f.x2},${f.z2}`)
 			frameRef.access().set(f)
 			commands.setGridPosition(f)
 		}
