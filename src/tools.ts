@@ -2,7 +2,7 @@ import routesRef from './hooks/routes'
 import { v4 as uuidv4 } from 'uuid'
 import { BSON } from 'bsonfy'
 
-const version = 'v0.1.3'
+const version = 'v0.1.4'
 
 let _firstTime = true
 const firstTime = () => {
@@ -12,7 +12,7 @@ const firstTime = () => {
 }
 
 const send = (ws, type, obj) => {
-	if (type != 'ping') console.log(`<-- ${type.toUpperCase()} ${Object.keys(obj).join(' ')}`)
+	// if (type != 'ping') console.log(`<-- ${type.toUpperCase()} ${Object.keys(obj).join(' ')}`)
 	ws.send(BSON.serialize({ ...obj, type }))
 }
 
@@ -43,9 +43,12 @@ const sleep = async (sec) => {
 
 const goto = (page) => routesRef.nested.current.set(page)
 
+let lastObjectURL = undefined
 const dataURL = (image, type = 'jpeg') => {
+	if (lastObjectURL) URL.revokeObjectURL(lastObjectURL)
 	const blob = new Blob([image], { type: `image/${type}` })
-	return URL.createObjectURL(blob)
+	lastObjectURL = URL.createObjectURL(blob)
+	return lastObjectURL
 }
 
 const boxValue = (n, min, max) => {

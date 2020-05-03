@@ -3,14 +3,16 @@ import { Segment, Dropdown, Image } from 'semantic-ui-react'
 import { percentageBar, colorBar } from './bars'
 import { useStateLink } from '@hookstate/core'
 import NoAssignment from '../ux/no-assignment'
-import onmap from '../../services/cmd_on-map'
 import portrait from '../../services/cmd_portrait'
 import colonist from '../../services/cmd_colonist'
+import grid from '../../services/cmd_grid'
 import state from '../../services/cmd_state'
 import commands from '../../commands'
 import createDOMPurify from 'dompurify'
 
 export default function ColonistOverview() {
+	const mapRef = useStateLink(grid.ref)
+	const frameLink = useStateLink(grid.frameRef)
 	const portraitLink = useStateLink(portrait.ref)
 	const stateLink = useStateLink(state.ref)
 	const colonistLink = useStateLink(colonist.ref)
@@ -61,23 +63,34 @@ export default function ColonistOverview() {
 		return choices
 	}
 
+	const mapSize = 128
+	const frame = frameLink.value
+	const mapInfo = mapRef.value
 	useEffect(() => {
 		const updateCanvas = async () => {
-			const x = (colonistLink.value.x * 32) / colonistLink.value.mx
-			const y = 32 - (colonistLink.value.y * 32) / colonistLink.value.my
+			const x = (colonistLink.value.x * mapSize) / colonistLink.value.mx
+			const y = mapSize - (colonistLink.value.y * mapSize) / colonistLink.value.my
+			const frame = frameLink.access().get()
 			const ctx = canvasRef.current.getContext('2d')
 			ctx.save()
-			ctx.clearRect(0, 0, 32, 32)
-			ctx.fillStyle = 'rgba(0,0,0,0.25)'
-			ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+			ctx.fillStyle = '#ccc'
+			ctx.fillRect(0, 0, mapSize, mapSize)
+			if (mapInfo.width > 0 && mapInfo.height > 0) {
+				const x1 = (frame.x1 * mapSize) / mapInfo.width
+				const z1 = (frame.z1 * mapSize) / mapInfo.height
+				const x2 = (frame.x2 * mapSize) / mapInfo.width
+				const z2 = (frame.z2 * mapSize) / mapInfo.height
+				ctx.fillStyle = 'white'
+				ctx.fillRect(x1, mapSize - z2, x2 - x1, z2 - z1)
+			}
 			ctx.beginPath()
-			ctx.arc(x, y, 1.5, 0, 2 * Math.PI, false)
-			ctx.fillStyle = 'white'
+			ctx.arc(x, y, 2, 0, 2 * Math.PI, false)
+			ctx.fillStyle = 'black'
 			ctx.fill()
 			ctx.restore()
 		}
 		if (canvasRef && canvasRef.current && colonistLink.value) updateCanvas()
-	})
+	}, [frame])
 
 	if (!colonistLink.value.name) return <NoAssignment />
 
@@ -101,10 +114,11 @@ export default function ColonistOverview() {
 								))}
 						</div>
 					</div>
-					<div style={{ position: 'relative', width: 128, height: 128 }}>
-						<Image src={onmap.ref.access().get()} style={{ position: 'absolute' }} />
-						<canvas ref={canvasRef} width="32" height="32" style={{ position: 'absolute', right: 2, bottom: 2 }}></canvas>
-					</div>
+					<canvas
+						ref={canvasRef}
+						width={mapSize}
+						height={mapSize}
+						style={{ position: 'absolute', right: 14, top: 14, width: '64px', height: '64px' }}></canvas>
 				</div>
 				<div style={{ ...nGrid('repeat(4, auto)'), paddingTop: '10px' }}>
 					{percentageBar(colonistLink.value.health, 'health')}

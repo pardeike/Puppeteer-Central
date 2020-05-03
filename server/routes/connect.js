@@ -3,7 +3,7 @@ const storage = require('../services/storage')
 const tools = require('../services/tools')
 const { encode, parse } = require('../services/bson')
 
-const minimumModVersion = '0.1.3.0'
+const minimumModVersion = '0.1.4.0'
 
 var counter = 0
 var debugMainCommands = true
@@ -107,7 +107,6 @@ async function connect(ws, req) {
 			case 'game-info':
 			case 'earn':
 			case 'portrait':
-			case 'on-map':
 			case 'colonist-basics':
 				// if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.info}`)
 				peers.gameMessage(msg.type, msg.viewer, msg.info)

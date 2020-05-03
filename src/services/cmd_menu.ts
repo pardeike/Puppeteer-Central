@@ -8,7 +8,6 @@ const link = (_ws) => {}
 const msg = (msg) => {
 	if (msg.type == 'menu') {
 		ref.access().set(msg.choices)
-		console.log(JSON.stringify(msg.choices))
 	}
 }
 

@@ -1,6 +1,5 @@
 import assignment from './services/cmd_assignment'
 import colonist from './services/cmd_colonist'
-import onmap from './services/cmd_on-map'
 import portrait from './services/cmd_portrait'
 import settings from './services/cmd_settings'
 import stream from './services/cmd_stream'
@@ -28,7 +27,6 @@ const leaveGame = (fully) => {
 	}
 	assignment.reset()
 	portrait.reset()
-	onmap.reset()
 	colonist.reset()
 	if (fully) tools.goto('lobby')
 }

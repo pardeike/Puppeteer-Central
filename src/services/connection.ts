@@ -5,7 +5,6 @@ import gameinfo from './cmd_game-info'
 import grid from './cmd_grid'
 import jobs from './cmd_jobs'
 import menu from './cmd_menu'
-import onmap from './cmd_on-map'
 import ping from './cmd_ping'
 import portrait from './cmd_portrait'
 import settings from './cmd_settings'
@@ -30,7 +29,6 @@ const connect = () => {
 		grid.link(ws)
 		jobs.link(ws)
 		menu.link(ws)
-		onmap.link(ws)
 		ping.link(ws)
 		portrait.link(ws)
 		settings.link(ws)
@@ -47,7 +45,6 @@ const connect = () => {
 		grid.remove(e)
 		jobs.remove(e)
 		menu.remove(e)
-		onmap.remove(e)
 		ping.remove(e)
 		portrait.remove(e)
 		settings.remove(e)
@@ -60,8 +57,8 @@ const connect = () => {
 	ws.onmessage = (e) => {
 		var bytes = new Uint8Array(e.data)
 		const msg = BSON.deserialize(bytes)
-		if (debug && 'on-map,portrait,earn,colonist-basics'.indexOf(msg['type']) == -1)
-			console.log(`--> ${msg['type'].toUpperCase()} ${Object.keys(msg).join(' ')}`)
+		//if (debug && 'portrait,earn,colonist-basics'.indexOf(msg['type']) == -1)
+		//	console.log(`--> ${msg['type'].toUpperCase()} ${Object.keys(msg).join(' ')}`)
 		assignment.msg(msg)
 		colonist.msg(msg)
 		earn.msg(msg)
@@ -69,7 +66,6 @@ const connect = () => {
 		grid.msg(msg)
 		jobs.msg(msg)
 		menu.msg(msg)
-		onmap.msg(msg)
 		ping.msg(msg)
 		portrait.msg(msg)
 		settings.msg(msg)

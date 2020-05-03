@@ -13,11 +13,15 @@ const gridFrame = {
 	inited: false,
 }
 const frameRef = createStateLink(gridFrame)
+const mapDataURLRef = createStateLink('')
 
 const initialValue = {
 	px: 0,
 	pz: 0,
-	val: [],
+	phx: 0.0,
+	phz: 0.0,
+	width: 0,
+	height: 0,
 	counter: 0,
 }
 const ref = createStateLink(initialValue)
@@ -29,6 +33,8 @@ const link = (_ws) => {
 const msg = (msg) => {
 	if (msg.type == 'grid') {
 		msg.info.counter = ref.access().nested.counter.value + 1
+		mapDataURLRef.access().set(tools.dataURL(msg.info.map))
+		msg.info.map = undefined
 		ref.access().set(msg.info)
 		const px = msg.info.px
 		const pz = msg.info.pz
@@ -57,6 +63,7 @@ const draftTo = (x, z) => {
 
 export default {
 	ref,
+	mapDataURLRef,
 	frameRef,
 	link,
 	msg,

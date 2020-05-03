@@ -1,72 +1,58 @@
 import React, { useEffect, createRef, useState } from 'react'
-import { Menu, Popup } from 'semantic-ui-react'
+import { Form, Menu, Popup } from 'semantic-ui-react'
 import { useStateLink } from '@hookstate/core'
 import commands from '../../commands'
 import colonist from '../../services/cmd_colonist'
 import grid from '../../services/cmd_grid'
 import menu from '../../services/cmd_menu'
-import gameinfo from '../../services/cmd_game-info'
 import TransformRecognizer from '../../services/transform-recogniser'
 import delay from '../../services/delay'
 import { Button } from 'semantic-ui-react'
 
-const cellSize = 24
-const cellSizeHalf = cellSize / 2
-const cellSizeDelta = cellSizeHalf / 1.5
-const alphas = [1, 0.5, 0.2, 0]
 let startDragX = 0
 let startDragY = 0
-let canvas = undefined
-let canvasX = 0
-let canvasY = 0
-let canvasWidth = 0
-let canvasHeight = 0
+let map = undefined
+let mapX = 0
+let mapY = 0
+let mapWidth = 0
+let mapHeight = 0
 
 export default function ColonistCombat() {
 	const colonistLink = useStateLink(colonist.ref)
 	const gridLink = useStateLink(grid.ref)
+	const mapDataURLLink = useStateLink(grid.mapDataURLRef)
 	const frameLink = useStateLink(grid.frameRef)
 	const menuLink = useStateLink(menu.ref)
 	const [eventHandlerAdded, setEventHandlerAdded] = useState(false)
 	const [autoFollow, setAutoFollow] = useState(true)
 
-	const canvasRef = createRef()
-	const terrainColors = gameinfo.ref.access().nested.terrain.get()
+	const mapRef = createRef()
 
-	const gridArray = gridLink.nested.val.value
 	const px = gridLink.nested.px.value
 	const pz = gridLink.nested.pz.value
+	const phx = gridLink.nested.phx.value
+	const phz = gridLink.nested.phz.value
 	const gridCounter = gridLink.nested.counter.value
 	const frame = frameLink.value
 
 	let angle = undefined
+	let position = undefined
 	if (px < frame.x1 || px > frame.x2 || pz < frame.z1 || pz > frame.z2) {
 		const ax = px - (frame.x1 + frame.x2) / 2
 		const az = pz - (frame.z1 + frame.z2) / 2
 		angle = Math.round((Math.atan2(-az, ax) * 180) / Math.PI)
+	} else {
+		position = {
+			x: Math.floor((100 * (phx - frame.x1)) / (frame.x2 - frame.x1 + 1)),
+			z: 99 - Math.floor((100 * (phz - frame.z1)) / (frame.z2 - frame.z1 + 1)),
+		}
 	}
-
-	const len = Math.sqrt(gridArray.length / 2)
-	const size = len * cellSize
 
 	const zoom = (val) => {
 		const delta = 1000 - Math.abs(val) * 50
 		delay.every('grid-draw', delta, () => {
 			const old = frameLink.access().get()
-			if (val <= -5 && old.x2 - old.x1 > 3 && old.z2 - old.z1 > 3) {
-				// Zoom in
-				const f = {
-					x1: old.x1 + 1,
-					z1: old.z1 + 1,
-					x2: old.x2 - 1,
-					z2: old.z2 - 1,
-					inited: true,
-				}
-				frameLink.access().set(f)
-				commands.setGridPosition(f)
-			}
 			if (val >= 5 && old.x2 - old.x1 < 80 && old.z2 - old.z1 < 80) {
-				// Zoom out
 				const f = {
 					x1: old.x1 - 1,
 					z1: old.z1 - 1,
@@ -77,13 +63,24 @@ export default function ColonistCombat() {
 				frameLink.access().set(f)
 				commands.setGridPosition(f)
 			}
+			if (val <= -5 && old.x2 - old.x1 > 2 && old.z2 - old.z1 > 2) {
+				const f = {
+					x1: old.x1 + 1,
+					z1: old.z1 + 1,
+					x2: old.x2 - 1,
+					z2: old.z2 - 1,
+					inited: true,
+				}
+				frameLink.access().set(f)
+				commands.setGridPosition(f)
+			}
 		})
 		return false
 	}
 
 	const move = (deltaX, deltaY) => {
-		const cx = frame.inited ? canvasWidth / (frame.x2 - frame.x1) : 0
-		const cy = frame.inited ? canvasHeight / (frame.z2 - frame.z1) : 0
+		const cx = frame.inited ? mapWidth / (frame.x2 - frame.x1) : 0
+		const cy = frame.inited ? mapHeight / (frame.z2 - frame.z1) : 0
 		const x = deltaX / (cx + 1)
 		const y = deltaY / (cy + 1)
 		const dx = Math.round(x - startDragX)
@@ -127,63 +124,16 @@ export default function ColonistCombat() {
 	}, [])
 
 	useEffect(() => {
-		canvas = canvasRef.current
-		const cr = canvas.getBoundingClientRect()
-		canvasX = cr.left
-		canvasY = cr.top
-		canvasWidth = cr.width
-		canvasHeight = cr.height
+		map = mapRef.current
+		const cr = map.getBoundingClientRect()
+		mapX = cr.left
+		mapY = cr.top
+		mapWidth = cr.width
+		mapHeight = cr.height
 
-		const updateCanvas = async () => {
-			const ctx = canvas.getContext('2d')
-			ctx.save()
-			ctx.fillStyle = 'black'
-			ctx.fillRect(0, 0, size, size)
-			for (let x = 0; x < len; x++)
-				for (let z = 0; z < len; z++) {
-					const n = (len - z - 1) * len + x
-					const c1 = gridArray[n * 2]
-					const c2 = gridArray[n * 2 + 1]
-					if (c1 != 255) {
-						ctx.fillStyle = terrainColors[c1]
-						ctx.fillRect(cellSize * x, cellSize * z, cellSize, cellSize)
-						if (c2 & 1) {
-							ctx.fillStyle = `rgba(0, 0, 0, ${alphas[(c2 & 6) / 2]})`
-							const inset = c2 & 4 ? cellSize / 5 : 0
-							ctx.fillRect(cellSize * x + inset, cellSize * z + inset, cellSize - 2 * inset, cellSize - 2 * inset)
-						}
-						if (c2 & 8) {
-							ctx.beginPath()
-							ctx.moveTo(cellSize * x + cellSizeHalf - cellSizeDelta, cellSize * z + cellSizeHalf)
-							ctx.lineTo(cellSize * x + cellSizeHalf, cellSize * z + cellSizeHalf - cellSizeDelta)
-							ctx.lineTo(cellSize * x + cellSizeHalf + cellSizeDelta, cellSize * z + cellSizeHalf)
-							ctx.lineTo(cellSize * x + cellSizeHalf, cellSize * z + cellSizeHalf + cellSizeDelta)
-							ctx.closePath()
-							ctx.fillStyle = 'rgba(0,255,0,0.2)'
-							ctx.fill()
-						}
-						if (c2 & 32) {
-							ctx.beginPath()
-							if (frame.x1 + x == px && frame.z1 + (len - 1 - z) == pz) {
-								ctx.fillStyle = 'blue'
-							} else {
-								let co = 'white'
-								if (c2 & 64) co = 'lightblue'
-								if (c2 & 128) co = 'red'
-								ctx.fillStyle = co
-							}
-							ctx.arc(cellSize * x + cellSizeHalf, cellSize * z + cellSizeHalf, cellSizeDelta, 0, 2 * Math.PI, false)
-							ctx.fill()
-						}
-					}
-				}
-			ctx.restore()
-		}
-
-		updateCanvas()
 		if (!eventHandlerAdded) {
 			setEventHandlerAdded(true)
-			canvas.addEventListener(
+			map.addEventListener(
 				'wheel',
 				function (evt) {
 					evt.preventDefault()
@@ -192,17 +142,17 @@ export default function ColonistCombat() {
 				},
 				false
 			)
-			canvas.addEventListener('contextmenu', (evt) => {
+			map.addEventListener('contextmenu', (evt) => {
 				evt.preventDefault()
 
-				const cr = canvas.getBoundingClientRect()
-				canvasX = cr.left
-				canvasY = cr.top
-				canvasWidth = cr.width
-				canvasHeight = cr.height
+				const cr = map.getBoundingClientRect()
+				mapX = cr.left
+				mapY = cr.top
+				mapWidth = cr.width
+				mapHeight = cr.height
 
-				const fx = (evt.clientX - canvasX) / canvasWidth
-				const fz = 1 - (evt.clientY - canvasY) / canvasHeight
+				const fx = (evt.clientX - mapX) / mapWidth
+				const fz = 1 - (evt.clientY - mapY) / mapHeight
 				const r = frame
 				const x = r.x1 + Math.floor((r.x2 - r.x1 + 1) * fx)
 				const z = r.z1 + Math.floor((r.z2 - r.z1 + 1) * fz)
@@ -212,7 +162,7 @@ export default function ColonistCombat() {
 
 				return false
 			})
-			const recognizer = new TransformRecognizer(canvas)
+			const recognizer = new TransformRecognizer(map)
 			recognizer.onScale((evt) => {
 				//
 			})
@@ -228,44 +178,89 @@ export default function ColonistCombat() {
 		return () => {}
 	}, [gridCounter])
 
-	const direction = {
+	const markerSize = mapHeight / (frame.z2 - frame.z1) / 1.5
+
+	const markerBase = {
 		position: 'absolute',
-		width: 'calc(50% - 10px)',
-		height: 20,
-		backgroundColor: 'clear',
+		width: '50%',
+		height: `${Math.floor(markerSize * 2)}px`,
 		left: '50%',
-		top: 'calc(50% - 10px)',
+		top: `calc(50% - ${Math.floor(markerSize)}px)`,
 		transform: `rotate(${angle}deg)`,
 		transformOrigin: 'left',
+		display: 'flex',
+		flexDirection: 'row-reverse',
+		alignItems: 'center',
+		itemAlign: 'right',
 		pointerEvents: 'none',
 	}
-	const marker = {
+	const markerItem = {
 		position: 'relative',
-		left: `60%`,
-		width: 20,
-		height: 20,
-		fontSize: 48,
-		color: 'blue',
-		borderRadius: '100%',
+		color: 'rgb(0,100,255)',
+		fontSize: markerSize * 2,
+		pointerEvents: 'none',
+		opacity: 0.5,
 	}
+	const circle = (pos) => ({
+		position: 'absolute',
+		width: `${Math.floor(markerSize * 2)}px`,
+		height: `${Math.floor(markerSize * 2)}px`,
+		left: `${pos.x}%`,
+		top: `${pos.z}%`,
+		transform: 'translate(-50%, -50%)',
+		transformOrigin: 'left',
+		border: `${markerSize / 5}px solid rgb(0, 100,255)`,
+		textAlign: 'center',
+		borderRadius: '100%',
+		pointerEvents: 'none',
+		opacity: 0.5,
+	})
 
 	const getMenuOptions = () => {
 		return menuLink.value.map((choice) => ({
 			key: choice.id,
+			disabled: choice.disabled,
 			content: choice.label,
 			value: choice.id,
 		}))
 	}
 
-	const popupStyle = {
-		position: 'relative',
-		left: '10px',
-		top: '30px',
-	}
-
+	let scale = Math.max(80 - 2 - Math.max(frameLink.value.x2 - frameLink.value.x1 - 2, 80 - 2 - frameLink.value.z2 - frameLink.value.z1 - 2)) / 78
+	scale = scale * scale * scale
 	return (
 		<React.Fragment>
-			<div style={{ paddingTop: 10, paddingBottom: 10, textAlign: 'right' }}>
+			<div
+				style={{
+					paddingTop: 10,
+					paddingBottom: 10,
+					display: 'grid',
+					columnGap: '10px',
+					gridTemplateColumns: 'minmax(25%, auto) min-content min-content',
+				}}>
+				<Form.Input
+					min={0}
+					max={1}
+					name="Scale"
+					onChange={(_, info) => {
+						const n = 41 - Math.round(40 * Math.cbrt(info.value))
+						const old = frameLink.access().get()
+						const cx = (old.x1 + old.x2) / 2
+						const cz = (old.z1 + old.z2) / 2
+						const f = {
+							x1: cx - n,
+							z1: cz - n,
+							x2: cx + n,
+							z2: cz + n,
+							inited: true,
+						}
+						frameLink.access().set(f)
+						commands.setGridPosition(f)
+					}}
+					step={0.01}
+					type="range"
+					style={{ width: '100%' }}
+					value={scale}
+				/>
 				<Button
 					size="mini"
 					color={colonistLink.value.drafted ? 'red' : 'green'}
@@ -274,27 +269,32 @@ export default function ColonistCombat() {
 					}}>
 					{colonistLink.value.drafted ? 'Undraft' : 'Draft'}
 				</Button>
-				&nbsp;
 				<Button size="mini" color="blue" disabled={autoFollow} onClick={() => setAutoFollow(true)}>
 					Follow
 				</Button>
 			</div>
-			<canvas ref={canvasRef} width={size} height={size} style={{ cursor: 'pointer', width: '100%', height: '100%' }} />
-			{angle !== undefined && (
-				<div style={direction}>
-					<div style={marker}>➜</div>
-				</div>
-			)}
-			<Popup context={canvasRef} size="mini" style={popupStyle} onClose={() => menuLink.access().set([])} open={menuLink.value.length > 0}>
+			<div style={{ position: 'relative', lineHeight: 0 }}>
+				<img ref={mapRef} draggable={false} src={mapDataURLLink.value} style={{ userSelect: 'none', cursor: 'pointer', width: '100%', height: '100%' }} />
+				{angle !== undefined && (
+					<div style={markerBase}>
+						<div style={markerItem}>➜</div>
+					</div>
+				)}
+				{position !== undefined && <div style={circle(position)} />}
+			</div>
+			<Popup context={mapRef} flowing={true} size="mini" position="bottom left" onClose={() => menuLink.access().set([])} open={menuLink.value.length > 0}>
 				<Menu
 					items={getMenuOptions()}
 					onItemClick={(_e, data) => {
 						commands.action(data.value)
 						menuLink.access().set([])
 					}}
-					style={{ width: '75% !important' }}
+					size="mini"
+					fluid
+					compact
 					secondary
 					vertical
+					fitted
 				/>
 			</Popup>
 		</React.Fragment>
