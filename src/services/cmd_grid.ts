@@ -20,7 +20,6 @@ const initialValue = {
 	pz: 0,
 	phx: 0.0,
 	phz: 0.0,
-	counter: 0,
 }
 const ref = createStateLink(initialValue)
 
@@ -30,7 +29,6 @@ const link = (_ws) => {
 
 const msg = (msg) => {
 	if (msg.type == 'grid') {
-		msg.info.counter = ref.access().nested.counter.value + 1
 		mapDataURLRef.access().set(tools.dataURL(msg.info.map))
 		msg.info.map = undefined
 		ref.access().set(msg.info)

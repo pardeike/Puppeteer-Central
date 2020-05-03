@@ -32,7 +32,6 @@ export default function ColonistCombat() {
 	const pz = gridLink.nested.pz.value
 	const phx = gridLink.nested.phx.value
 	const phz = gridLink.nested.phz.value
-	const gridCounter = gridLink.nested.counter.value
 	const frame = frameLink.value
 
 	let angle = undefined
@@ -176,7 +175,7 @@ export default function ColonistCombat() {
 		}
 
 		return () => {}
-	}, [gridCounter])
+	}, [mapDataURLLink.value])
 
 	const markerSize = mapHeight / (frame.z2 - frame.z1) / 1.5
 
