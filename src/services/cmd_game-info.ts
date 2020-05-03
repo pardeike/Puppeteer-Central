@@ -1,7 +1,7 @@
 import { createStateLink } from '@hookstate/core'
 
 const initialValue = {
-	terrain: [],
+	version: '',
 }
 const ref = createStateLink(initialValue)
 

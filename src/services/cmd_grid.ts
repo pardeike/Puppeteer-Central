@@ -20,8 +20,6 @@ const initialValue = {
 	pz: 0,
 	phx: 0.0,
 	phz: 0.0,
-	width: 0,
-	height: 0,
 	counter: 0,
 }
 const ref = createStateLink(initialValue)

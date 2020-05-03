@@ -11,7 +11,6 @@ import commands from '../../commands'
 import createDOMPurify from 'dompurify'
 
 export default function ColonistOverview() {
-	const mapRef = useStateLink(grid.ref)
 	const frameLink = useStateLink(grid.frameRef)
 	const portraitLink = useStateLink(portrait.ref)
 	const stateLink = useStateLink(state.ref)
@@ -65,24 +64,23 @@ export default function ColonistOverview() {
 
 	const mapSize = 128
 	const frame = frameLink.value
-	const mapInfo = mapRef.value
 	useEffect(() => {
 		const updateCanvas = async () => {
-			const x = (colonistLink.value.x * mapSize) / colonistLink.value.mx
-			const y = mapSize - (colonistLink.value.y * mapSize) / colonistLink.value.my
+			const mx = colonistLink.value.mx
+			const my = colonistLink.value.my
+			const x = (colonistLink.value.x * mapSize) / mx
+			const y = mapSize - (colonistLink.value.y * mapSize) / my
 			const frame = frameLink.access().get()
+			const x1 = (frame.x1 * mapSize) / mx
+			const z1 = (frame.z1 * mapSize) / my
+			const x2 = (frame.x2 * mapSize) / mx
+			const z2 = (frame.z2 * mapSize) / my
 			const ctx = canvasRef.current.getContext('2d')
 			ctx.save()
 			ctx.fillStyle = '#ccc'
 			ctx.fillRect(0, 0, mapSize, mapSize)
-			if (mapInfo.width > 0 && mapInfo.height > 0) {
-				const x1 = (frame.x1 * mapSize) / mapInfo.width
-				const z1 = (frame.z1 * mapSize) / mapInfo.height
-				const x2 = (frame.x2 * mapSize) / mapInfo.width
-				const z2 = (frame.z2 * mapSize) / mapInfo.height
-				ctx.fillStyle = 'white'
-				ctx.fillRect(x1, mapSize - z2, x2 - x1, z2 - z1)
-			}
+			ctx.fillStyle = 'white'
+			ctx.fillRect(x1, mapSize - z2, x2 - x1, z2 - z1)
 			ctx.beginPath()
 			ctx.arc(x, y, 2, 0, 2 * Math.PI, false)
 			ctx.fillStyle = 'black'
