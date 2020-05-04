@@ -18,7 +18,7 @@ const debug = true
 
 const connect = () => {
 	const host = document.location.host
-	const proto = host.indexOf('localhost') >= 0 ? 'ws' : 'wss'
+	const proto = host.indexOf('localhost') >= 0 || host.indexOf('andreaspc.local') >= 0 ? 'ws' : 'wss'
 	const ws = new WebSocket(`${proto}://${host}/connect`)
 	ws.binaryType = 'arraybuffer'
 	ws.onopen = () => {
