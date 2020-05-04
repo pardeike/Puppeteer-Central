@@ -13,6 +13,7 @@
 		"watch": "webpack --watch"
 	},
 	"dependencies": {
+		"@d-fischer/passport-twitch": "1.0.3",
 		"@hookstate/core": "1.7.1",
 		"@hookstate/mutate": "1.2.3",
 		"@hookstate/persistence": "1.5.2",
@@ -35,7 +36,6 @@
 		"node-fetch": "2.6.0",
 		"nodemon-webpack-plugin": "4.3.1",
 		"passport": "0.4.1",
-		"passport-twitch.js": "0.0.7",
 		"passport-youtube-v3": "2.1.0",
 		"react-image": "2.4.0",
 		"regenerator-runtime": "0.13.5",

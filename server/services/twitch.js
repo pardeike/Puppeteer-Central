@@ -1,5 +1,5 @@
 const fetch = require('node-fetch')
-const TwitchStrategy = require('passport-twitch.js').Strategy
+const TwitchStrategy = require('@d-fischer/passport-twitch').Strategy
 
 async function verifyToken(token) {
 	const url = 'https://api.twitch.tv/helix/users'

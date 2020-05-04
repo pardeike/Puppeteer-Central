@@ -18,7 +18,7 @@ function register(app) {
 		}),
 		login
 	)
-	app.get('/auth/twitch', passport.authenticate('twitch.js', { scope: [''] }), login)
+	app.get('/auth/twitch', passport.authenticate('twitch', { scope: [''] }), login)
 }
 
 function login(req, res) {
