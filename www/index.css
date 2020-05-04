@@ -5,6 +5,10 @@
 	background-color: black;
 	color: white;
 }
+*:not(input):not(textarea) {
+	-webkit-user-select: none;
+	-webkit-touch-callout: none;
+}
 #game {
 	position: absolute;
 	margin: 50px 20px 20px 20px;

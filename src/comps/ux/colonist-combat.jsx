@@ -93,6 +93,23 @@ export default function ColonistCombat() {
 		return false
 	}
 
+	const contextMenu = (map, cx, cy, shift) => {
+		const cr = map.getBoundingClientRect()
+		mapX = cr.left
+		mapY = cr.top
+		mapWidth = cr.width
+		mapHeight = cr.height
+
+		const fx = (cx - mapX) / mapWidth
+		const fz = 1 - (cy - mapY) / mapHeight
+		const r = frame
+		const x = r.x1 + Math.floor((r.x2 - r.x1 + 1) * fx)
+		const z = r.z1 + Math.floor((r.z2 - r.z1 + 1) * fz)
+
+		if (shift) commands.goto(x, z)
+		else commands.menu(x, z)
+	}
+
 	const moveGrid = (dx, dy) => {
 		const f = {
 			x1: frameLink.nested.x1.value - dx,
@@ -143,30 +160,18 @@ export default function ColonistCombat() {
 			)
 			map.addEventListener('contextmenu', (evt) => {
 				evt.preventDefault()
-
-				const cr = map.getBoundingClientRect()
-				mapX = cr.left
-				mapY = cr.top
-				mapWidth = cr.width
-				mapHeight = cr.height
-
-				const fx = (evt.clientX - mapX) / mapWidth
-				const fz = 1 - (evt.clientY - mapY) / mapHeight
-				const r = frame
-				const x = r.x1 + Math.floor((r.x2 - r.x1 + 1) * fx)
-				const z = r.z1 + Math.floor((r.z2 - r.z1 + 1) * fz)
-
-				if (evt.shiftKey) commands.goto(x, z)
-				else commands.menu(x, z)
-
+				contextMenu(map, evt.clientX, evt.clientY, evt.shiftKey)
 				return false
 			})
 			const recognizer = new TransformRecognizer(map)
 			recognizer.onScale((evt) => {
-				//
+				zoom((evt.scale - 1) * -20)
 			})
 			recognizer.onMove((evt) => {
 				move(evt.x, evt.y)
+			})
+			recognizer.onLong((evt) => {
+				contextMenu(map, evt.x, evt.y, false)
 			})
 			recognizer.onStop(() => {
 				startDragX = 0

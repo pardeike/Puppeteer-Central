@@ -1,6 +1,8 @@
 function TransformRecognizer(element) {
 	this.startTouch = null
 	this.referencePair = null
+	this.touchDelay = null
+	this.touchDuration = 900
 
 	element.addEventListener('touchstart', this.touchStartHandler.bind(this))
 	element.addEventListener('touchmove', this.touchMoveHandler.bind(this))
@@ -13,6 +15,7 @@ function TransformRecognizer(element) {
 	this.element = element
 
 	this.callbacks = {
+		long: null,
 		move: null,
 		rotate: null,
 		scale: null,
@@ -38,6 +41,9 @@ TransformRecognizer.prototype.touchStartHandler = function (e) {
 	const touches = e.touches
 	if (touches.length == 1) {
 		this.startTouch = new Touch(touches[0].pageX, touches[0].pageY)
+		this.touchDelay = setTimeout(() => {
+			this.callbacks.long({ x: this.startTouch.x, y: this.startTouch.y })
+		}, this.touchDuration)
 	}
 	if (touches.length == 2) {
 		this.referencePair = new TouchPair(touches)
@@ -54,10 +60,12 @@ TransformRecognizer.prototype.touchMoveHandler = function (e) {
 	const touches = e.touches
 	if (touches.length == 1) {
 		const currentTouch = new Touch(touches[0].pageX, touches[0].pageY)
-		this.callbacks.move({
+		const move = {
 			x: currentTouch.x - this.startTouch.x,
 			y: currentTouch.y - this.startTouch.y,
-		})
+		}
+		this.callbacks.move(move)
+		if (Math.abs(move.x) > 3 || Math.abs(move.y) > 3) clearTimeout(this.touchDelay)
 		return
 	}
 	if (touches.length == 2) {
@@ -101,6 +109,7 @@ TransformRecognizer.prototype.mouseMoveHandler = function (e) {
 
 TransformRecognizer.prototype.touchEndHandler = function (e) {
 	const touches = e.touches
+	clearTimeout(this.touchDelay)
 	if (touches.length < 2) {
 		this.currentGesture = this.Gestures.NONE
 	}
@@ -110,6 +119,10 @@ TransformRecognizer.prototype.touchEndHandler = function (e) {
 TransformRecognizer.prototype.mouseEndHandler = function (e) {
 	this.currentGesture = this.Gestures.NONE
 	this.callbacks.stop()
+}
+
+TransformRecognizer.prototype.onLong = function (callback) {
+	this.callbacks.long = callback
 }
 
 TransformRecognizer.prototype.onMove = function (callback) {
