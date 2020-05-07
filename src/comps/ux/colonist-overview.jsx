@@ -7,13 +7,23 @@ import portrait from '../../services/cmd_portrait'
 import colonist from '../../services/cmd_colonist'
 import grid from '../../services/cmd_grid'
 import state from '../../services/cmd_state'
+import timeInfo from '../../services/cmd_time-info'
 import commands from '../../commands'
 import createDOMPurify from 'dompurify'
 
+const speedTags = [
+	<span style={{ color: 'blue' }}>Paused</span>,
+	<b style={{ color: 'green' }}>Normal</b>,
+	<b style={{ color: 'orange' }}>Fast</b>,
+	<b style={{ color: 'red' }}>Superfast</b>,
+	<b style={{ color: 'red' }}>Ultrafast</b>,
+]
+
 export default function ColonistOverview() {
-	const frameLink = useStateLink(grid.frameRef)
+	const gridLink = useStateLink(grid.ref)
 	const portraitLink = useStateLink(portrait.ref)
 	const stateLink = useStateLink(state.ref)
+	const timeInfoLink = useStateLink(timeInfo.ref)
 	const colonistLink = useStateLink(colonist.ref)
 	const DOMPurify = createDOMPurify(window)
 
@@ -63,14 +73,14 @@ export default function ColonistOverview() {
 	}
 
 	const mapSize = 128
-	const frame = frameLink.value
+	const frame = gridLink.nested.frame.value
 	useEffect(() => {
 		const updateCanvas = async () => {
 			const mx = colonistLink.value.mx
 			const my = colonistLink.value.my
 			const x = (colonistLink.value.x * mapSize) / mx
 			const y = mapSize - (colonistLink.value.y * mapSize) / my
-			const frame = frameLink.access().get()
+			const frame = gridLink.access().nested.frame.get()
 			const x1 = (frame.x1 * mapSize) / mx
 			const z1 = (frame.z1 * mapSize) / my
 			const x2 = (frame.x2 * mapSize) / mx
@@ -95,7 +105,7 @@ export default function ColonistOverview() {
 	return (
 		<Segment.Group>
 			<Segment>
-				<div style={nGrid('auto 128px')}>
+				<div style={nGrid('auto minmax(120px, 170px) 64px')}>
 					<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 						<div style={colonistPortrait}>
 							{colonistLink.value.drafted && <img src="/i/drafted.png" style={draft} />}
@@ -111,6 +121,9 @@ export default function ColonistOverview() {
 									<div key={i}>{DOMPurify.sanitize(line)}</div>
 								))}
 						</div>
+					</div>
+					<div>
+						{timeInfoLink.value.time}, {speedTags[timeInfoLink.value.speed]}
 					</div>
 					<canvas
 						ref={canvasRef}

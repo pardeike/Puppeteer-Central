@@ -172,7 +172,7 @@ export default function ColonisSchedules() {
 					</div>
 				))}
 				{prios.rows.map((row, ri) => (
-					<React.Fragment key={row.pawn}>
+					<React.Fragment key={ri}>
 						<div className={row.yours ? 'bolder' : undefined} style={labelStyle}>
 							{row.pawn}
 						</div>
@@ -190,7 +190,7 @@ export default function ColonisSchedules() {
 					</div>
 				))}
 				{sched.rows.map((row, ri) => (
-					<React.Fragment key={row.pawn}>
+					<React.Fragment key={ri}>
 						<div className={row.yours ? 'bolder' : undefined} style={labelStyle}>
 							{row.pawn}
 						</div>

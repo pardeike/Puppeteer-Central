@@ -12,6 +12,7 @@ import state from './cmd_state'
 import status from './cmd_status'
 import stream from './cmd_stream'
 import streamers from './cmd_streamers'
+import timeinfo from './cmd_time-info'
 import { BSON } from 'bsonfy'
 
 const debug = true
@@ -36,6 +37,7 @@ const connect = () => {
 		status.link(ws)
 		stream.link(ws)
 		streamers.link(ws)
+		timeinfo.link(ws)
 	}
 	ws.onclose = (e) => {
 		assignment.remove(e)
@@ -52,6 +54,7 @@ const connect = () => {
 		status.remove(e)
 		stream.remove(e)
 		streamers.remove(e)
+		timeinfo.remove(e)
 		setTimeout(connect, 1000)
 	}
 	ws.onmessage = (e) => {
@@ -73,6 +76,7 @@ const connect = () => {
 		status.msg(msg)
 		stream.msg(msg)
 		streamers.msg(msg)
+		timeinfo.msg(msg)
 	}
 }
 export default connect

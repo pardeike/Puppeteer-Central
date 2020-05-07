@@ -19,6 +19,7 @@ let mapY = 0
 let mapWidth = 0
 let mapHeight = 0
 let newFrame = { x1: -1, z1: -1, x2: -1, z2: -1 }
+let mapTimer = undefined
 
 export default function ColonistCombat() {
 	const gameLink = useStateLink(game.ref)
@@ -37,7 +38,7 @@ export default function ColonistCombat() {
 	grid.setMapUpdateCallback((url, frm) => {
 		setMapURL(url)
 		newFrame = frm
-		setTimeout(() => {
+		mapTimer = setTimeout(() => {
 			setMapRefresh(mapRefresh + 1)
 			follow()
 			commands.requestGridUpdate(newFrame)
@@ -48,8 +49,10 @@ export default function ColonistCombat() {
 		const delta = 1000 - Math.abs(val) * 50
 		delay.every('grid-draw', delta, () => {
 			let dir = 0
-			if (val >= 5 && newFrame.x2 - newFrame.x1 < 80 && newFrame.z2 - newFrame.z1 < 80) dir = -1
-			if (val <= -5 && newFrame.x2 - newFrame.x1 > 2 && newFrame.z2 - newFrame.z1 > 2) dir = 1
+			const f = gridLink.value.frame
+			let scale = (Math.max(2, Math.min(80, f.x2 - f.x1, f.z2 - f.z1)) - 2) / (80 - 2)
+			if (val >= 5 * scale && newFrame.x2 - newFrame.x1 < 80 && newFrame.z2 - newFrame.z1 < 80) dir = -1
+			if (val <= -5 * scale && newFrame.x2 - newFrame.x1 > 2 && newFrame.z2 - newFrame.z1 > 2) dir = 1
 			if (dir != 0) {
 				newFrame = {
 					x1: newFrame.x1 + dir,
@@ -148,6 +151,7 @@ export default function ColonistCombat() {
 	useEffect(() => {
 		setTimeout(() => commands.requestGridUpdate(undefined), 0)
 		return () => {
+			clearTimeout(mapTimer)
 			grid.setMapUpdateCallback(undefined)
 		}
 	}, [])

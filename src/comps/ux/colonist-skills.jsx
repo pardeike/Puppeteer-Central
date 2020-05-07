@@ -25,6 +25,7 @@ export default function ColonistSkills() {
 	}
 
 	const tag = (t, i) => {
+		if (!t.name) return <span>—</span>
 		return (
 			<span key={i} style={{ whiteSpace: 'nowrap', padding: '2px 6px 2px 6px', marginRight: 4, backgroundColor: '#ddd' }}>
 				{t.name}{' '}
@@ -46,12 +47,13 @@ export default function ColonistSkills() {
 	}
 
 	const row = { paddingTop: '4px' }
+	const history = { __html: colonistLink.value.inspect[0] }
 
 	return (
 		<Segment.Group>
 			<Segment raised style={header}>
 				<div>
-					<b>{colonistLink.value.inspect[0]}</b>
+					<b style={row} dangerouslySetInnerHTML={history}></b>
 					<div style={row}>Childhood: {tag(colonistLink.value.childhood)}</div>
 					<div style={row}>Adulthood: {tag(colonistLink.value.adulthood)}</div>
 				</div>
@@ -68,8 +70,8 @@ export default function ColonistSkills() {
 			</Segment>
 			<Segment raised>
 				<div style={grid}>
-					{colonistLink.value.skills?.map((skill) => (
-						<React.Fragment key={skill.name}>
+					{colonistLink.value.skills?.map((skill, i) => (
+						<React.Fragment key={i}>
 							<div style={{ whiteSpace: 'nowrap' }}>{skill.name}</div>
 							{skill.passion ? <img src={`/i/passion${skill.passion}.png`} /> : <div />}
 							{skillBar(skill)}
