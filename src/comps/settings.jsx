@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Button, Card } from 'semantic-ui-react'
 import { useStateLink } from '@hookstate/core'
 import status from '../services/cmd_status'
-import tools from '../tools'
 import Settings01 from './settings01'
 import Settings02 from './settings02'
 import Settings03 from './settings03'
@@ -23,7 +22,6 @@ export default function Settings() {
 					Streamer
 				</Button>
 			</Button.Group>
-			<span style={{ color: 'white', opacity: 0.2, float: 'right' }}>{tools.version}</span>
 			<Card.Group>
 				<Settings01 mode={mode} />
 				<Settings02 mode={mode} />

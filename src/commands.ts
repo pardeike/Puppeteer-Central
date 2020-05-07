@@ -51,12 +51,8 @@ const tickSchedule = (idx, sched) => {
 	stream.state('schedule', `${idx}:${sched}`)
 }
 
-const requestGrid = () => {
-	stream.state('grid', '')
-}
-
-const setGridPosition = (frame) => {
-	stream.state('grid', `${frame.x1}:${frame.z1}:${frame.x2}:${frame.z2}`)
+const requestGridUpdate = (f) => {
+	stream.state('grid', `${f.x1}:${f.z1}:${f.x2}:${f.z2}`)
 }
 
 const goto = (px, pz) => {
@@ -79,8 +75,7 @@ export default {
 	setZone,
 	tickPriority,
 	tickSchedule,
-	requestGrid,
-	setGridPosition,
+	requestGridUpdate,
 	goto,
 	menu,
 	action,

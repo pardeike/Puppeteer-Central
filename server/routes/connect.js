@@ -3,7 +3,7 @@ const storage = require('../services/storage')
 const tools = require('../services/tools')
 const { encode, parse } = require('../services/bson')
 
-const minimumModVersion = '0.1.4.0'
+const minimumModVersion = '0.1.5.0'
 
 var counter = 0
 var debugMainCommands = true

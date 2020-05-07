@@ -41,7 +41,7 @@ export default function Header() {
 					{pair[1]}
 				</div>
 			))}
-			<span />
+			<span style={{ fontSize: '0.6em', color: 'rgba(255,255,255,0.2)', textAlign: 'right' }}>{tools.version}</span>
 			<AccountProxy />
 		</div>
 	)

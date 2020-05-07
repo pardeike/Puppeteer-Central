@@ -1,144 +1,160 @@
 function TransformRecognizer(element) {
-	this.startTouch = null
-	this.referencePair = null
-	this.touchDelay = null
-	this.touchDuration = 900
-
-	element.addEventListener('touchstart', this.touchStartHandler.bind(this))
-	element.addEventListener('touchmove', this.touchMoveHandler.bind(this))
-	element.addEventListener('touchend', this.touchEndHandler.bind(this))
-	element.addEventListener('mousedown', this.mouseStartHandler.bind(this))
-	element.addEventListener('mousemove', this.mouseMoveHandler.bind(this))
-	element.addEventListener('mouseup', this.mouseEndHandler.bind(this))
-	element.addEventListener('mouseleave', this.mouseEndHandler.bind(this))
-	element.addEventListener('mouseout', this.mouseEndHandler.bind(this))
-	this.element = element
-
-	this.callbacks = {
-		long: null,
-		move: null,
-		rotate: null,
-		scale: null,
-		stop: null,
-	}
-
-	this.Gestures = {
+	const Gestures = {
 		NONE: 0,
 		ROTATE: 1,
 		SCALE: 2,
 		DRAG: 3,
 	}
 
-	this.Thresholds = {
+	const Thresholds = {
 		SCALE: 0.2, // percentage difference.
 		ROTATION: 5, // degrees.
 	}
 
-	this.currentGesture = this.Gestures.NONE
-}
+	let startTouch = null
+	let referencePair = null
+	let touchDelay = null
+	let currentGesture = Gestures.NONE
+	const touchDuration = 900
 
-TransformRecognizer.prototype.touchStartHandler = function (e) {
-	const touches = e.touches
-	if (touches.length == 1) {
-		this.startTouch = new Touch(touches[0].pageX, touches[0].pageY)
-		this.touchDelay = setTimeout(() => {
-			this.callbacks.long({ x: this.startTouch.x, y: this.startTouch.y })
-		}, this.touchDuration)
+	let callbacks = {
+		long: null,
+		move: null,
+		rotate: null,
+		scale: null,
+		stop: null,
+		wheel: null,
+		context: null,
 	}
-	if (touches.length == 2) {
-		this.referencePair = new TouchPair(touches)
+
+	TransformRecognizer.prototype.onEvent = (eventName, cb) => {
+		callbacks[eventName] = cb
 	}
-}
 
-TransformRecognizer.prototype.mouseStartHandler = function (e) {
-	this.startTouch = new Touch(e.offsetX, e.offsetY)
-	this.currentGesture = this.Gestures.DRAG
-}
-
-TransformRecognizer.prototype.touchMoveHandler = function (e) {
-	e.preventDefault()
-	const touches = e.touches
-	if (touches.length == 1) {
-		const currentTouch = new Touch(touches[0].pageX, touches[0].pageY)
-		const move = {
-			x: currentTouch.x - this.startTouch.x,
-			y: currentTouch.y - this.startTouch.y,
+	const touchStartHandler = (e) => {
+		e.preventDefault()
+		const touches = e.touches
+		if (touches.length == 1) {
+			startTouch = new Touch(touches[0].pageX, touches[0].pageY)
+			touchDelay = setTimeout(() => {
+				callbacks.long({ x: startTouch.x, y: startTouch.y })
+			}, touchDuration)
 		}
-		this.callbacks.move(move)
-		if (Math.abs(move.x) > 3 || Math.abs(move.y) > 3) clearTimeout(this.touchDelay)
-		return
+		if (touches.length == 2) {
+			referencePair = new TouchPair(touches)
+		}
+		return false
 	}
-	if (touches.length == 2) {
-		const currentPair = new TouchPair(touches)
-		const angle = currentPair.angleSince(this.referencePair)
-		const scale = currentPair.scaleSince(this.referencePair)
 
-		if (this.currentGesture == this.Gestures.NONE) {
-			if (angle > this.Thresholds.ROTATION || -angle > this.Thresholds.ROTATION) {
-				this.currentGesture = this.Gestures.ROTATE
-			} else if (scale > 1 + this.Thresholds.SCALE || scale < 1 - this.Thresholds.SCALE) {
-				this.currentGesture = this.Gestures.SCALE
+	const mouseStartHandler = (e) => {
+		e.preventDefault()
+		startTouch = new Touch(e.offsetX, e.offsetY)
+		currentGesture = Gestures.DRAG
+		return false
+	}
+
+	const touchMoveHandler = function (e) {
+		e.preventDefault()
+		const touches = e.touches
+		if (touches.length == 1) {
+			const currentTouch = new Touch(touches[0].pageX, touches[0].pageY)
+			const move = {
+				x: currentTouch.x - startTouch.x,
+				y: currentTouch.y - startTouch.y,
+			}
+			callbacks.move(move)
+			if (Math.abs(move.x) > 3 || Math.abs(move.y) > 3) clearTimeout(touchDelay)
+			return false
+		}
+		if (touches.length == 2) {
+			const currentPair = new TouchPair(touches)
+			const angle = currentPair.angleSince(referencePair)
+			const scale = currentPair.scaleSince(referencePair)
+
+			if (currentGesture == Gestures.NONE) {
+				if (angle > Thresholds.ROTATION || -angle > Thresholds.ROTATION) {
+					currentGesture = Gestures.ROTATE
+				} else if (scale > 1 + Thresholds.SCALE || scale < 1 - Thresholds.SCALE) {
+					currentGesture = Gestures.SCALE
+				}
+			}
+			const center = currentPair.center()
+			if (currentGesture == Gestures.ROTATE) {
+				callbacks.rotate({
+					rotation: angle,
+					x: center.x,
+					y: center.y,
+				})
+			}
+			if (currentGesture == Gestures.SCALE) {
+				callbacks.scale({
+					scale: scale,
+					x: center.x,
+					y: center.y,
+				})
 			}
 		}
-		const center = currentPair.center()
-		if (this.currentGesture == this.Gestures.ROTATE) {
-			this.callbacks.rotate({
-				rotation: angle,
-				x: center.x,
-				y: center.y,
-			})
-		}
-		if (this.currentGesture == this.Gestures.SCALE) {
-			this.callbacks.scale({
-				scale: scale,
-				x: center.x,
-				y: center.y,
-			})
-		}
+		return false
 	}
-}
 
-TransformRecognizer.prototype.mouseMoveHandler = function (e) {
-	if (this.currentGesture != this.Gestures.DRAG) return
-	const currentTouch = new Touch(e.offsetX, e.offsetY)
-	this.callbacks.move({
-		x: currentTouch.x - this.startTouch.x,
-		y: currentTouch.y - this.startTouch.y,
-	})
-}
-
-TransformRecognizer.prototype.touchEndHandler = function (e) {
-	const touches = e.touches
-	clearTimeout(this.touchDelay)
-	if (touches.length < 2) {
-		this.currentGesture = this.Gestures.NONE
+	const mouseMoveHandler = (e) => {
+		e.preventDefault()
+		if (currentGesture != Gestures.DRAG) return
+		const currentTouch = new Touch(e.offsetX, e.offsetY)
+		callbacks.move({
+			x: currentTouch.x - startTouch.x,
+			y: currentTouch.y - startTouch.y,
+		})
+		return false
 	}
-	this.callbacks.stop()
-}
 
-TransformRecognizer.prototype.mouseEndHandler = function (e) {
-	this.currentGesture = this.Gestures.NONE
-	this.callbacks.stop()
-}
+	const touchEndHandler = (e) => {
+		e.preventDefault()
+		const touches = e.touches
+		clearTimeout(touchDelay)
+		if (touches.length < 2) {
+			currentGesture = Gestures.NONE
+		}
+		callbacks.stop()
+		return false
+	}
 
-TransformRecognizer.prototype.onLong = function (callback) {
-	this.callbacks.long = callback
-}
+	const mouseEndHandler = (e) => {
+		e.preventDefault()
+		currentGesture = Gestures.NONE
+		callbacks.stop()
+		return false
+	}
 
-TransformRecognizer.prototype.onMove = function (callback) {
-	this.callbacks.move = callback
-}
+	const wheelHandler = (e) => {
+		e.preventDefault()
+		callbacks.wheel({
+			x: e.deltaX,
+			y: e.deltaY,
+		})
+		return false
+	}
 
-TransformRecognizer.prototype.onStop = function (callback) {
-	this.callbacks.stop = callback
-}
+	const contextMenuHandler = (e) => {
+		e.preventDefault()
+		callbacks.context({
+			x: e.clientX,
+			y: e.clientY,
+			shift: e.shiftKey,
+		})
+		return false
+	}
 
-TransformRecognizer.prototype.onScale = function (callback) {
-	this.callbacks.scale = callback
-}
-
-TransformRecognizer.prototype.onRotate = function (callback) {
-	this.callbacks.rotate = callback
+	element.addEventListener('touchstart', touchStartHandler, false)
+	element.addEventListener('touchmove', touchMoveHandler, false)
+	element.addEventListener('touchend', touchEndHandler, false)
+	element.addEventListener('mousedown', mouseStartHandler, false)
+	element.addEventListener('mousemove', mouseMoveHandler, false)
+	element.addEventListener('mouseup', mouseEndHandler, false)
+	element.addEventListener('mouseleave', mouseEndHandler, false)
+	element.addEventListener('mouseout', mouseEndHandler, false)
+	element.addEventListener('wheel', wheelHandler, false)
+	element.addEventListener('contextmenu', contextMenuHandler, false)
 }
 
 function TouchPair(touchList) {

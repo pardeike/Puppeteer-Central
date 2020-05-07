@@ -2,6 +2,7 @@ import React, { useEffect, createRef, useState } from 'react'
 import { Form, Menu, Popup } from 'semantic-ui-react'
 import { useStateLink } from '@hookstate/core'
 import commands from '../../commands'
+import game from '../../services/cmd_game-info'
 import colonist from '../../services/cmd_colonist'
 import grid from '../../services/cmd_grid'
 import menu from '../../services/cmd_menu'
@@ -18,15 +19,27 @@ let mapWidth = 0
 let mapHeight = 0
 
 export default function ColonistCombat() {
+	const gameLink = useStateLink(game.ref)
 	const colonistLink = useStateLink(colonist.ref)
 	const gridLink = useStateLink(grid.ref)
-	const mapDataURLLink = useStateLink(grid.mapDataURLRef)
 	const frameLink = useStateLink(grid.frameRef)
 	const menuLink = useStateLink(menu.ref)
 	const [eventHandlerAdded, setEventHandlerAdded] = useState(false)
 	const [autoFollow, setAutoFollow] = useState(true)
 
+	let mapFrequency = gameLink.value.mapFreq
+	if (mapFrequency == 0) mapFrequency = 400
+
 	const mapRef = createRef()
+	const [mapURL, setMapURL] = useState('')
+	const [mapRefresh, setMapRefresh] = useState(0)
+	grid.setMapUpdateCallback((url) => {
+		setMapURL(url)
+		setTimeout(() => {
+			setMapRefresh(mapRefresh + 1)
+			commands.requestGridUpdate(frameLink.value)
+		}, mapFrequency)
+	})
 
 	const px = gridLink.nested.px.value
 	const pz = gridLink.nested.pz.value
@@ -47,6 +60,19 @@ export default function ColonistCombat() {
 		}
 	}
 
+	const init = () => {
+		const x = colonistLink.value.x
+		const y = colonistLink.value.y
+		const f = {
+			x1: x - 3,
+			z1: y - 3,
+			x2: x + 3,
+			z2: y + 3,
+		}
+		frameLink.access().set(f)
+		return f
+	}
+
 	const zoom = (val) => {
 		const delta = 1000 - Math.abs(val) * 50
 		delay.every('grid-draw', delta, () => {
@@ -57,10 +83,8 @@ export default function ColonistCombat() {
 					z1: old.z1 - 1,
 					x2: old.x2 + 1,
 					z2: old.z2 + 1,
-					inited: true,
 				}
 				frameLink.access().set(f)
-				commands.setGridPosition(f)
 			}
 			if (val <= -5 && old.x2 - old.x1 > 2 && old.z2 - old.z1 > 2) {
 				const f = {
@@ -68,18 +92,16 @@ export default function ColonistCombat() {
 					z1: old.z1 + 1,
 					x2: old.x2 - 1,
 					z2: old.z2 - 1,
-					inited: true,
 				}
 				frameLink.access().set(f)
-				commands.setGridPosition(f)
 			}
 		})
 		return false
 	}
 
 	const move = (deltaX, deltaY) => {
-		const cx = frame.inited ? mapWidth / (frame.x2 - frame.x1) : 0
-		const cy = frame.inited ? mapHeight / (frame.z2 - frame.z1) : 0
+		const cx = frame.x2 != frame.x1 ? mapWidth / (frame.x2 - frame.x1) : 0
+		const cy = frame.z2 != frame.z1 ? mapHeight / (frame.z2 - frame.z1) : 0
 		const x = deltaX / (cx + 1)
 		const y = deltaY / (cy + 1)
 		const dx = Math.round(x - startDragX)
@@ -116,73 +138,65 @@ export default function ColonistCombat() {
 			z1: frameLink.nested.z1.value + dy,
 			x2: frameLink.nested.x2.value - dx,
 			z2: frameLink.nested.z2.value + dy,
-			inited: true,
 		}
 		frameLink.access().set(f)
-		commands.setGridPosition(f)
-	}
-
-	if (autoFollow && frame.inited) {
-		let n = 0
-		n = Math.floor((frame.x2 - frame.x1) / 8)
-		if (px - n < frame.x1) moveGrid(1, 0)
-		if (px + n > frame.x2) moveGrid(-1, 0)
-		n = Math.floor((frame.z2 - frame.z1) / 8)
-		if (pz - n < frame.z1) moveGrid(0, -1)
-		if (pz + n > frame.z2) moveGrid(0, 1)
 	}
 
 	useEffect(() => {
-		if (!frame.inited) {
-			commands.requestGrid()
+		setTimeout(() => commands.requestGridUpdate(init()), 0)
+		return () => {
+			grid.setMapUpdateCallback(undefined)
 		}
-		return () => {}
 	}, [])
 
 	useEffect(() => {
 		map = mapRef.current
+		if (!map) return
 		const cr = map.getBoundingClientRect()
 		mapX = cr.left
 		mapY = cr.top
 		mapWidth = cr.width
 		mapHeight = cr.height
 
+		if (autoFollow && frameLink.nested.x2.value != frameLink.nested.x1.value && frameLink.nested.z2.value != frameLink.nested.z1.value) {
+			let n = 0
+			n = 1 + Math.floor(Math.abs(frameLink.nested.x2.value - frameLink.nested.x1.value) / 8)
+			if (px - n < frameLink.nested.x1.value) moveGrid(frameLink.nested.x1.value - (px - n), 0)
+			if (px + n > frameLink.nested.x2.value) moveGrid(frameLink.nested.x2.value - (px + n), 0)
+			n = 1 + Math.floor(Math.abs(frameLink.nested.z2.value - frameLink.nested.z1.value) / 8)
+			if (pz - n < frameLink.nested.z1.value) moveGrid(0, pz - n - frameLink.nested.z1.value)
+			if (pz + n > frameLink.nested.z2.value) moveGrid(0, pz + n - frameLink.nested.z2.value)
+		}
+
 		if (!eventHandlerAdded) {
 			setEventHandlerAdded(true)
-			map.addEventListener(
-				'wheel',
-				function (evt) {
-					evt.preventDefault()
-					zoom(evt.deltaY)
-					return false
-				},
-				false
-			)
-			map.addEventListener('contextmenu', (evt) => {
-				evt.preventDefault()
-				contextMenu(map, evt.clientX, evt.clientY, evt.shiftKey)
-				return false
-			})
 			const recognizer = new TransformRecognizer(map)
-			recognizer.onScale((evt) => {
-				zoom((evt.scale - 1) * -20)
+			recognizer.onEvent('scale', (e) => {
+				zoom((e.scale - 1) * -20)
 			})
-			recognizer.onMove((evt) => {
-				move(evt.x, evt.y)
+			recognizer.onEvent('move', (e) => {
+				move(e.x, e.y)
 			})
-			recognizer.onLong((evt) => {
-				contextMenu(map, evt.x, evt.y, false)
+			recognizer.onEvent('long', (e) => {
+				contextMenu(map, e.x, e.y, false)
 			})
-			recognizer.onStop(() => {
+			recognizer.onEvent('wheel', (e) => {
+				zoom(e.y)
+			})
+			recognizer.onEvent('context', (e) => {
+				contextMenu(map, e.x, e.y, e.shift)
+			})
+			recognizer.onEvent('stop', () => {
 				startDragX = 0
 				startDragY = 0
 			})
 		}
 
 		return () => {}
-	}, [mapDataURLLink.value])
+	}, [mapURL])
 
-	const markerSize = mapHeight / (frame.z2 - frame.z1) / 1.5
+	const dz = frame.z2 - frame.z1
+	const markerSize = dz == 0 ? 0 : mapHeight / (frame.z2 - frame.z1) / 1.5
 
 	const markerBase = {
 		position: 'absolute',
@@ -255,10 +269,8 @@ export default function ColonistCombat() {
 							z1: cz - n,
 							x2: cx + n,
 							z2: cz + n,
-							inited: true,
 						}
 						frameLink.access().set(f)
-						commands.setGridPosition(f)
 					}}
 					step={0.01}
 					type="range"
@@ -278,7 +290,7 @@ export default function ColonistCombat() {
 				</Button>
 			</div>
 			<div style={{ position: 'relative', lineHeight: 0 }}>
-				<img ref={mapRef} draggable={false} src={mapDataURLLink.value} style={{ userSelect: 'none', cursor: 'pointer', width: '100%', height: '100%' }} />
+				{mapURL && <img ref={mapRef} draggable={false} src={mapURL} style={{ userSelect: 'none', cursor: 'pointer', width: '100%', height: '100%' }} />}
 				{angle !== undefined && (
 					<div style={markerBase}>
 						<div style={markerItem}>➜</div>
@@ -298,7 +310,6 @@ export default function ColonistCombat() {
 					compact
 					secondary
 					vertical
-					fitted
 				/>
 			</Popup>
 		</React.Fragment>
