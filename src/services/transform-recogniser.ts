@@ -145,16 +145,16 @@ function TransformRecognizer(element) {
 		return false
 	}
 
-	element.addEventListener('touchstart', touchStartHandler, false)
-	element.addEventListener('touchmove', touchMoveHandler, false)
-	element.addEventListener('touchend', touchEndHandler, false)
-	element.addEventListener('mousedown', mouseStartHandler, false)
-	element.addEventListener('mousemove', mouseMoveHandler, false)
-	element.addEventListener('mouseup', mouseEndHandler, false)
-	element.addEventListener('mouseleave', mouseEndHandler, false)
-	element.addEventListener('mouseout', mouseEndHandler, false)
-	element.addEventListener('wheel', wheelHandler, false)
-	element.addEventListener('contextmenu', contextMenuHandler, false)
+	element.addEventListener('touchstart', touchStartHandler, { capture: true, passive: false })
+	element.addEventListener('touchmove', touchMoveHandler, { capture: true, passive: false })
+	element.addEventListener('touchend', touchEndHandler, { capture: true, passive: false })
+	element.addEventListener('mousedown', mouseStartHandler, { capture: true, passive: false })
+	element.addEventListener('mousemove', mouseMoveHandler, { capture: true, passive: false })
+	element.addEventListener('mouseup', mouseEndHandler, { capture: true, passive: false })
+	element.addEventListener('mouseleave', mouseEndHandler, { capture: true, passive: false })
+	element.addEventListener('mouseout', mouseEndHandler, { capture: true, passive: false })
+	element.addEventListener('wheel', wheelHandler, { capture: true, passive: false })
+	element.addEventListener('contextmenu', contextMenuHandler, { capture: true, passive: false })
 }
 
 function TouchPair(touchList) {

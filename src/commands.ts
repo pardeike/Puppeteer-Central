@@ -52,7 +52,7 @@ const tickSchedule = (idx, sched) => {
 }
 
 const requestGridUpdate = (f) => {
-	stream.state('grid', `${f.x1}:${f.z1}:${f.x2}:${f.z2}`)
+	stream.state('grid', f ? `${f.x1}:${f.z1}:${f.x2}:${f.z2}` : '')
 }
 
 const goto = (px, pz) => {
