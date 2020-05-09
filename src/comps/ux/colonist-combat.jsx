@@ -41,7 +41,7 @@ export default function ColonistCombat() {
 	grid.setMapUpdateCallback((url, frm) => {
 		setMapURL(url)
 		newFrame = frm
-		setNewFrameTrigger(frm)
+		setNewFrameTrigger(newFrame)
 		mapTimer = setTimeout(() => {
 			setMapRefresh(mapRefresh + 1)
 			follow()
@@ -217,7 +217,7 @@ export default function ColonistCombat() {
 		}
 
 		return () => {}
-	}, [mapURL, newFrame])
+	}, [mapURL, newFrameTrigger])
 
 	const getMenuOptions = () => {
 		return menuLink.value.map((choice) => ({
