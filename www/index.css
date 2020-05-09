@@ -37,7 +37,7 @@
 	padding: 0 !important;
 	padding-bottom: 5px !important;
 	border-radius: 0 !important;
-	border-bottom: 1px solid gray !important;
+	border-bottom: 0.5px solid lightgray !important;
 }
 .ui.secondary.vertical.menu > .item:last-child {
 	padding-bottom: 0 !important;

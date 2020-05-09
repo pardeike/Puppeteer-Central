@@ -30,6 +30,7 @@ export default function ColonistCombat() {
 	const [eventHandlerAdded, setEventHandlerAdded] = useState(false)
 	const [autoFollow, setAutoFollow] = useState(true)
 	const [popupCoordinates, setPopupCoordinates] = useState({ x: -1, y: -1 })
+	const [newFrameTrigger, setNewFrameTrigger] = useState({})
 
 	let mapFrequency = gameLink.value.mapFreq
 	if (mapFrequency == 0) mapFrequency = 400
@@ -40,6 +41,7 @@ export default function ColonistCombat() {
 	grid.setMapUpdateCallback((url, frm) => {
 		setMapURL(url)
 		newFrame = frm
+		setNewFrameTrigger(frm)
 		mapTimer = setTimeout(() => {
 			setMapRefresh(mapRefresh + 1)
 			follow()
@@ -71,6 +73,7 @@ export default function ColonistCombat() {
 					x2: newFrame.x2 - dir,
 					z2: newFrame.z2 - dir,
 				}
+				setNewFrameTrigger(newFrame)
 			}
 		})
 		return false
@@ -94,6 +97,7 @@ export default function ColonistCombat() {
 				x2: newFrame.x2 - dx,
 				z2: newFrame.z2 + dy,
 			}
+			setNewFrameTrigger(newFrame)
 		}
 		return false
 	}
@@ -140,6 +144,7 @@ export default function ColonistCombat() {
 			x2: cx + n,
 			z2: cz + n,
 		}
+		setNewFrameTrigger(newFrame)
 	}
 
 	const relativeCoordinates = (map, cx, cy) => {
@@ -243,7 +248,6 @@ export default function ColonistCombat() {
 
 	const gizmoSize = 50
 
-	console.log('update')
 	return (
 		<React.Fragment>
 			<div style={topGrid}>
@@ -257,7 +261,7 @@ export default function ColonistCombat() {
 			</div>
 			<div style={{ position: 'relative', lineHeight: 0 }}>
 				<div ref={popupAnchorRef} style={{ position: 'absolute', left: popupCoordinates.x, top: popupCoordinates.y, width: 0, height: 0 }} />
-				<GameMap mapURL={mapURL} mapRef={mapRef} newFrame={newFrame} selection={selectionLink.access().nested.frame.get()} />
+				<GameMap mapURL={mapURL} mapRef={mapRef} newFrame={newFrameTrigger} selection={selectionLink.access().nested.frame.get()} />
 			</div>
 			<Popup context={popupAnchorRef} flowing pinned size="mini" onClose={() => menuLink.access().set([])} open={menuLink.value.length > 0}>
 				<Menu

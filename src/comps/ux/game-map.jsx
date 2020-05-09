@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useStateLink } from '@hookstate/core'
 import grid from '../../services/cmd_grid'
 
-let mapHeight = 0
+let mapWidth = 0
 
 export default function GameMap(props) {
 	const gridLink = useStateLink(grid.ref)
@@ -13,6 +13,10 @@ export default function GameMap(props) {
 	const phx = g.phx
 	const phz = g.phz
 	const frame = g.frame
+
+	useEffect(() => {
+		mapWidth = props.mapRef.current?.getBoundingClientRect().width ?? 0
+	}, [props.mapURL])
 
 	let angle = undefined
 	let position = undefined
@@ -43,16 +47,9 @@ export default function GameMap(props) {
 		}
 	}
 
-	useEffect(() => {
-		const map = props.mapRef.current
-		if (!map) return
-		const cr = map.getBoundingClientRect()
-		mapHeight = cr.height
-	}, [props.mapURL])
-
-	const cellSize = frame.z2 == frame.z1 ? 0 : mapHeight / (frame.z2 - frame.z1)
+	const cellSize = frame.z2 == frame.z1 ? 0 : mapWidth / (frame.z2 - frame.z1 + 1)
 	const markerSize = cellSize / 1.5
-	const newMarkerSize = newFrame.z2 == newFrame.z1 ? 0 : mapHeight / (newFrame.z2 - newFrame.z1) / 1.5
+	const newMarkerSize = newFrame.z2 == newFrame.z1 ? 0 : mapWidth / (newFrame.z2 - newFrame.z1 + 1) / 1.5
 
 	const markerBase = (ms, ang) => ({
 		position: 'absolute',
