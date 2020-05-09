@@ -35,12 +35,14 @@ const initialValue = {
 }
 const ref = createStateLink(initialValue)
 const flagsRef = createStateLink(initialFlags)
+const isDraftedRef = createStateLink(false)
 
 const link = (_ws) => {}
 
 const msg = (msg) => {
 	if (msg.type == 'colonist-basics') {
 		ref.access().set(msg.info)
+		if (msg.info.drafted != isDraftedRef.access().get()) isDraftedRef.access().set(msg.info.drafted)
 
 		const flags = flagsRef.access().nested
 		if (flags.assigned.value != msg.info.name > '') {
@@ -63,6 +65,7 @@ export default {
 	initialValue,
 	ref,
 	flagsRef,
+	isDraftedRef,
 	link,
 	msg,
 	remove,

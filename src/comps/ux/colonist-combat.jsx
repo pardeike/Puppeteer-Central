@@ -23,7 +23,7 @@ let mapTimer = undefined
 
 export default function ColonistCombat() {
 	const gameLink = useStateLink(game.ref)
-	const colonistLink = useStateLink(colonist.ref)
+	const isDraftedLink = useStateLink(colonist.isDraftedRef)
 	const gridLink = useStateLink(grid.ref)
 	const menuLink = useStateLink(menu.ref)
 	const selectionLink = useStateLink(selection.ref)
@@ -46,6 +46,13 @@ export default function ColonistCombat() {
 			commands.requestGridUpdate(newFrame)
 		}, mapFrequency)
 	})
+	useEffect(() => {
+		commands.requestGridUpdate(undefined)
+		return () => {
+			clearTimeout(mapTimer)
+			grid.setMapUpdateCallback(undefined)
+		}
+	}, [])
 
 	const popupAnchorRef = createRef()
 
@@ -157,14 +164,6 @@ export default function ColonistCombat() {
 		else commands.menu(coord.x, coord.z)
 	}
 
-	useEffect(() => {
-		setTimeout(() => commands.requestGridUpdate(undefined), 0)
-		return () => {
-			clearTimeout(mapTimer)
-			grid.setMapUpdateCallback(undefined)
-		}
-	}, [])
-
 	/*const addDebugState = (state) => {
 		debugState.unshift(state)
 		for (var i = debugState.length - 1; i > 0; i--) if (debugState[i] == 'stop') debugState.splice(i)
@@ -244,12 +243,13 @@ export default function ColonistCombat() {
 
 	const gizmoSize = 50
 
+	console.log('update')
 	return (
 		<React.Fragment>
 			<div style={topGrid}>
 				<Form.Input min={0} max={1} name="Scale" onChange={slider} step={0.01} type="range" style={{ width: '100%' }} value={scale} />
-				<Button size="mini" color={colonistLink.value.drafted ? 'red' : 'green'} onClick={() => commands.setDraftModus(!colonistLink.value.drafted)}>
-					{colonistLink.value.drafted ? 'Undraft' : 'Draft'}
+				<Button size="mini" color={isDraftedLink.value ? 'red' : 'green'} onClick={() => commands.setDraftModus(!isDraftedLink.value)}>
+					{isDraftedLink.value ? 'Undraft' : 'Draft'}
 				</Button>
 				<Button size="mini" color="blue" disabled={autoFollow} onClick={() => setAutoFollow(true)}>
 					Follow
