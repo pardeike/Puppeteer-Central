@@ -19,6 +19,7 @@ const link = (_ws) => {}
 const msg = (msg) => {
 	if (msg.type == 'selection') {
 		msg.atlasURL = tools.dataURL(msg.atlas)
+		msg.atlas = undefined
 		ref.access().set(msg)
 	}
 }

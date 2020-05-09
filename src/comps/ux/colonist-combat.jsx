@@ -222,7 +222,7 @@ export default function ColonistCombat() {
 	const getMenuOptions = () => {
 		return menuLink.value.map((choice) => ({
 			key: choice.id,
-			disabled: choice.disabled,
+			disabled: choice.disabled || !choice.allowed,
 			content: choice.label,
 			value: choice.id,
 		}))
@@ -230,6 +230,7 @@ export default function ColonistCombat() {
 
 	const doGizmo = (gizmo) => {
 		if (gizmo.disabled) return
+		if (!gizmo.allowed) return
 		commands.gizmo(gizmo.id)
 		selection.reset()
 	}
@@ -245,6 +246,15 @@ export default function ColonistCombat() {
 		columnGap: '10px',
 		gridTemplateColumns: 'minmax(25%, auto) min-content min-content',
 	}
+
+	const gizmoStyle = (g) => ({
+		cursor: g.allowed ? (g.disabled ? 'default' : 'pointer') : 'not-allowed',
+		width: gizmoSize,
+		height: gizmoSize,
+		position: 'relative',
+		overflow: 'hidden',
+		opacity: g.allowed ? 1 : 0.5,
+	})
 
 	const gizmoSize = 50
 
@@ -281,17 +291,22 @@ export default function ColonistCombat() {
 				{selectionLink.nested.gizmos.value.map((gizmo, i) => {
 					return (
 						<div key={gizmo.id} style={{ paddingTop: '10px' }}>
-							<div
-								style={{
-									cursor: gizmo.disabled ? 'default' : 'pointer',
-									width: gizmoSize,
-									height: gizmoSize,
-									position: 'relative',
-									overflow: 'hidden',
-								}}
-								onClick={() => doGizmo(gizmo)}>
-								<img src={selectionLink.nested.atlasURL.value} height={gizmoSize} style={{ position: 'relative', left: i * -gizmoSize, top: 0 }} />
-							</div>
+							<Popup
+								flowing
+								pinned
+								size="mini"
+								content={gizmo.disabled}
+								disabled={!gizmo.disabled}
+								trigger={
+									<div style={gizmoStyle(gizmo)} onClick={() => doGizmo(gizmo)}>
+										<img
+											src={selectionLink.nested.atlasURL.value}
+											height={gizmoSize}
+											style={{ position: 'relative', left: i * -gizmoSize, top: 0 }}
+										/>
+									</div>
+								}
+							/>
 							<div style={{ textAlign: 'center', fontSize: '0.6em', lineHeight: '1.1em' }}>{gizmo.label}</div>
 						</div>
 					)
