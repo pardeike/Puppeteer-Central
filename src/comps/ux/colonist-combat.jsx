@@ -222,7 +222,7 @@ export default function ColonistCombat() {
 	const getMenuOptions = () => {
 		return menuLink.value.map((choice) => ({
 			key: choice.id,
-			disabled: choice.disabled || !choice.allowed,
+			disabled: choice.disabled,
 			content: choice.label,
 			value: choice.id,
 		}))
