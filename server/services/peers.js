@@ -349,6 +349,15 @@ function menu(client, viewer, choices) {
 	}
 }
 
+function selection(client, viewer, frame, gizmos, atlas) {
+	try {
+		const json = { type: 'selection', frame, gizmos, atlas }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => safeClientSend(c, json, true))
+	} catch (err) {
+		console.log(`### menu error: ${err}`)
+	}
+}
+
 module.exports = {
 	addClient,
 	addGame,
@@ -371,4 +380,5 @@ module.exports = {
 	returnJobResult,
 	grid,
 	menu,
+	selection,
 }

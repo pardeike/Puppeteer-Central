@@ -29,6 +29,20 @@
 	border-top: 1px solid #d4d4d5 !important;
 	top: -1px;
 }
+.ui.menu {
+	min-height: unset !important;
+}
+.ui.secondary.vertical.menu > .item {
+	width: 100% !important;
+	padding: 0 !important;
+	padding-bottom: 5px !important;
+	border-radius: 0 !important;
+	border-bottom: 1px solid gray !important;
+}
+.ui.secondary.vertical.menu > .item:last-child {
+	padding-bottom: 0 !important;
+	border-bottom: unset !important;
+}
 .ui.grid > .column:not(.row) {
 	padding-top: 0.5rem !important;
 	padding-bottom: 0.5rem !important;

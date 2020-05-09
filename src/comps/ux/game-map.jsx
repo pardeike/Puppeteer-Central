@@ -50,7 +50,8 @@ export default function GameMap(props) {
 		mapHeight = cr.height
 	}, [props.mapURL])
 
-	const markerSize = frame.z2 == frame.z1 ? 0 : mapHeight / (frame.z2 - frame.z1) / 1.5
+	const cellSize = frame.z2 == frame.z1 ? 0 : mapHeight / (frame.z2 - frame.z1)
+	const markerSize = cellSize / 1.5
 	const newMarkerSize = newFrame.z2 == newFrame.z1 ? 0 : mapHeight / (newFrame.z2 - newFrame.z1) / 1.5
 
 	const markerBase = (ms, ang) => ({
@@ -91,6 +92,31 @@ export default function GameMap(props) {
 		opacity: op,
 	})
 
+	const brackets = (p, i) => ({
+		position: 'absolute',
+		width: `${cellSize}px`,
+		height: `${cellSize}px`,
+		left: `${p.x}%`,
+		top: `${p.z}%`,
+		transform: 'translate(0%, -100%)',
+		transformOrigin: 'left',
+		backgroundImage: `url(/i/brackets/${i}.png`,
+		backgroundPosition: 'center',
+		backgroundSize: 'cover',
+		pointerEvents: 'none',
+		opacity: 0.7,
+	})
+
+	const selectionCorners = props.selection.map((c, i) => {
+		if (c.x >= frame.x1 && c.x <= frame.x2 && c.z >= frame.z1 && c.z <= frame.z2) {
+			const info = {
+				x: Math.floor((100 * (c.x - frame.x1)) / (frame.x2 - frame.x1 + 1)),
+				z: 99 - Math.floor((100 * (c.z - frame.z1)) / (frame.z2 - frame.z1 + 1)),
+			}
+			return <div key={i} style={brackets(info, i)} />
+		}
+	})
+
 	return (
 		<React.Fragment>
 			{props.mapURL && (
@@ -108,6 +134,7 @@ export default function GameMap(props) {
 				</div>
 			)}
 			{newPosition && newPosition != position && <div style={circle(newPosition, newMarkerSize, 0.2)} />}
+			{selectionCorners}
 		</React.Fragment>
 	)
 }

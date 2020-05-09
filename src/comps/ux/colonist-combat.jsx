@@ -1,11 +1,12 @@
 import React, { useEffect, createRef, useState } from 'react'
 import { Form, Menu, Popup } from 'semantic-ui-react'
-import { useStateLink, createStateLink } from '@hookstate/core'
+import { useStateLink } from '@hookstate/core'
 import commands from '../../commands'
 import game from '../../services/cmd_game-info'
 import colonist from '../../services/cmd_colonist'
 import grid from '../../services/cmd_grid'
 import menu from '../../services/cmd_menu'
+import selection from '../../services/cmd_selection'
 import TransformRecognizer from '../../services/transform-recogniser'
 import delay from '../../services/delay'
 import { Button } from 'semantic-ui-react'
@@ -14,20 +15,21 @@ import GameMap from './game-map'
 let startDragX = 0
 let startDragY = 0
 let map = undefined
-let mapX = 0
-let mapY = 0
 let mapWidth = 0
 let mapHeight = 0
 let newFrame = { x1: -1, z1: -1, x2: -1, z2: -1 }
 let mapTimer = undefined
+//let debugState = []
 
 export default function ColonistCombat() {
 	const gameLink = useStateLink(game.ref)
 	const colonistLink = useStateLink(colonist.ref)
 	const gridLink = useStateLink(grid.ref)
 	const menuLink = useStateLink(menu.ref)
+	const selectionLink = useStateLink(selection.ref)
 	const [eventHandlerAdded, setEventHandlerAdded] = useState(false)
 	const [autoFollow, setAutoFollow] = useState(true)
+	const [popupCoordinates, setPopupCoordinates] = useState({ x: -1, y: -1 })
 
 	let mapFrequency = gameLink.value.mapFreq
 	if (mapFrequency == 0) mapFrequency = 400
@@ -44,6 +46,8 @@ export default function ColonistCombat() {
 			commands.requestGridUpdate(newFrame)
 		}, mapFrequency)
 	})
+
+	const popupAnchorRef = createRef()
 
 	const zoom = (val) => {
 		const delta = 1000 - Math.abs(val) * 50
@@ -131,21 +135,26 @@ export default function ColonistCombat() {
 		}
 	}
 
-	const contextMenu = (map, cx, cy, shift) => {
+	const relativeCoordinates = (map, cx, cy) => {
 		const cr = map.getBoundingClientRect()
-		mapX = cr.left
-		mapY = cr.top
-		mapWidth = cr.width
-		mapHeight = cr.height
-
-		const fx = (cx - mapX) / mapWidth
-		const fz = 1 - (cy - mapY) / mapHeight
+		const fx = cx / cr.width
+		const fz = 1 - cy / cr.height
 		const f = gridLink.value.frame
 		const x = f.x1 + Math.floor((f.x2 - f.x1 + 1) * fx)
 		const z = f.z1 + Math.floor((f.z2 - f.z1 + 1) * fz)
+		return { x, z }
+	}
 
-		if (shift) commands.goto(x, z)
-		else commands.menu(x, z)
+	const select = (map, cx, cy) => {
+		const coord = relativeCoordinates(map, cx, cy)
+		commands.gizmos(coord.x, coord.z)
+	}
+
+	const contextMenu = (map, cx, cy, shift) => {
+		setPopupCoordinates({ x: cx, y: cy })
+		const coord = relativeCoordinates(map, cx, cy)
+		if (shift) commands.goto(coord.x, coord.z)
+		else commands.menu(coord.x, coord.z)
 	}
 
 	useEffect(() => {
@@ -156,32 +165,46 @@ export default function ColonistCombat() {
 		}
 	}, [])
 
+	/*const addDebugState = (state) => {
+		debugState.unshift(state)
+		for (var i = debugState.length - 1; i > 0; i--) if (debugState[i] == 'stop') debugState.splice(i)
+	}
+
+	const showDebugState = (
+		<div>
+			{debugState.map((ds) => (
+				<span style={{ backgroundColor: '#eee', padding: 4, marginRight: 2 }}>{ds}</span>
+			))}
+		</div>
+	)*/
+
 	useEffect(() => {
 		map = mapRef.current
 		if (!map) return
 		const cr = map.getBoundingClientRect()
-		mapX = cr.left
-		mapY = cr.top
 		mapWidth = cr.width
 		mapHeight = cr.height
 
 		if (!eventHandlerAdded) {
 			setEventHandlerAdded(true)
-			const recognizer = new TransformRecognizer(map)
+			const recognizer = new TransformRecognizer(map /*, addDebugState*/)
 			recognizer.onEvent('scale', (e) => {
 				zoom((e.scale - 1) * -20)
 			})
 			recognizer.onEvent('move', (e) => {
 				move(e.x, e.y)
 			})
+			recognizer.onEvent('short', (e) => {
+				if (e.btn == 0) select(map, e.x, e.y)
+				else if (e.btn == 2) contextMenu(map, e.x, e.y, e.shift)
+				menuLink.access().set([])
+			})
 			recognizer.onEvent('long', (e) => {
 				contextMenu(map, e.x, e.y, false)
+				menuLink.access().set([])
 			})
 			recognizer.onEvent('wheel', (e) => {
 				zoom(e.y)
-			})
-			recognizer.onEvent('context', (e) => {
-				contextMenu(map, e.x, e.y, e.shift)
 			})
 			recognizer.onEvent('stop', () => {
 				startDragX = 0
@@ -201,6 +224,12 @@ export default function ColonistCombat() {
 		}))
 	}
 
+	const doGizmo = (gizmo) => {
+		if (gizmo.disabled) return
+		commands.gizmo(gizmo.id)
+		selection.reset()
+	}
+
 	const f = gridLink.value.frame
 	let scale = 1 - (Math.max(2, Math.min(80, f.x2 - f.x1, f.z2 - f.z1)) - 2) / (80 - 2)
 	scale = scale * scale * scale
@@ -212,6 +241,8 @@ export default function ColonistCombat() {
 		columnGap: '10px',
 		gridTemplateColumns: 'minmax(25%, auto) min-content min-content',
 	}
+
+	const gizmoSize = 50
 
 	return (
 		<React.Fragment>
@@ -225,9 +256,10 @@ export default function ColonistCombat() {
 				</Button>
 			</div>
 			<div style={{ position: 'relative', lineHeight: 0 }}>
-				<GameMap mapURL={mapURL} mapRef={mapRef} newFrame={newFrame} />
+				<div ref={popupAnchorRef} style={{ position: 'absolute', left: popupCoordinates.x, top: popupCoordinates.y, width: 0, height: 0 }} />
+				<GameMap mapURL={mapURL} mapRef={mapRef} newFrame={newFrame} selection={selectionLink.access().nested.frame.get()} />
 			</div>
-			<Popup context={mapRef} flowing={true} size="mini" position="bottom left" onClose={() => menuLink.access().set([])} open={menuLink.value.length > 0}>
+			<Popup context={popupAnchorRef} flowing pinned size="mini" onClose={() => menuLink.access().set([])} open={menuLink.value.length > 0}>
 				<Menu
 					items={getMenuOptions()}
 					onItemClick={(_e, data) => {
@@ -241,6 +273,26 @@ export default function ColonistCombat() {
 					vertical
 				/>
 			</Popup>
+			<div style={{ display: 'grid', gridColumnGap: 8, gridTemplateColumns: `repeat(auto-fill, ${gizmoSize}px)` }}>
+				{selectionLink.nested.gizmos.value.map((gizmo, i) => {
+					return (
+						<div key={gizmo.id} style={{ paddingTop: '10px' }}>
+							<div
+								style={{
+									cursor: gizmo.disabled ? 'default' : 'pointer',
+									width: gizmoSize,
+									height: gizmoSize,
+									position: 'relative',
+									overflow: 'hidden',
+								}}
+								onClick={() => doGizmo(gizmo)}>
+								<img src={selectionLink.nested.atlasURL.value} height={gizmoSize} style={{ position: 'relative', left: i * -gizmoSize, top: 0 }} />
+							</div>
+							<div style={{ textAlign: 'center', fontSize: '0.6em', lineHeight: '1.1em' }}>{gizmo.label}</div>
+						</div>
+					)
+				})}
+			</div>
 		</React.Fragment>
 	)
 }

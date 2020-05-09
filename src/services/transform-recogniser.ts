@@ -1,9 +1,10 @@
-function TransformRecognizer(element) {
+function TransformRecognizer(element, dcb) {
 	const Gestures = {
 		NONE: 0,
 		ROTATE: 1,
 		SCALE: 2,
-		DRAG: 3,
+		CLICK: 3,
+		DRAG: 4,
 	}
 
 	const Thresholds = {
@@ -11,20 +12,22 @@ function TransformRecognizer(element) {
 		ROTATION: 5, // degrees.
 	}
 
-	let startTouch = null
-	let referencePair = null
-	let touchDelay = null
+	let startTouch = undefined
+	let referencePair = undefined
+	let touchDelay = undefined
 	let currentGesture = Gestures.NONE
 	const touchDuration = 900
+	const debugCallback = dcb
 
 	let callbacks = {
-		long: null,
-		move: null,
-		rotate: null,
-		scale: null,
-		stop: null,
-		wheel: null,
-		context: null,
+		short: (_) => {},
+		long: (_) => {},
+		move: (_) => {},
+		rotate: (_) => {},
+		scale: (_) => {},
+		stop: () => {},
+		wheel: (_) => {},
+		context: (_) => {},
 	}
 
 	TransformRecognizer.prototype.onEvent = (eventName, cb) => {
@@ -35,21 +38,24 @@ function TransformRecognizer(element) {
 		e.preventDefault()
 		const touches = e.touches
 		if (touches.length == 1) {
-			startTouch = new Touch(touches[0].pageX, touches[0].pageY)
+			startTouch = new Touch(e, touches[0].pageX, touches[0].pageY)
+			currentGesture = Gestures.CLICK
 			touchDelay = setTimeout(() => {
+				if (debugCallback) debugCallback(`long ${startTouch.x} ${startTouch.y}`)
 				callbacks.long({ x: startTouch.x, y: startTouch.y })
+				currentGesture = Gestures.NONE
 			}, touchDuration)
 		}
 		if (touches.length == 2) {
-			referencePair = new TouchPair(touches)
+			referencePair = new TouchPair(e, touches)
 		}
 		return false
 	}
 
 	const mouseStartHandler = (e) => {
 		e.preventDefault()
-		startTouch = new Touch(e.offsetX, e.offsetY)
-		currentGesture = Gestures.DRAG
+		startTouch = new Touch(undefined, e.offsetX, e.offsetY)
+		currentGesture = Gestures.CLICK
 		return false
 	}
 
@@ -57,17 +63,19 @@ function TransformRecognizer(element) {
 		e.preventDefault()
 		const touches = e.touches
 		if (touches.length == 1) {
-			const currentTouch = new Touch(touches[0].pageX, touches[0].pageY)
+			const currentTouch = new Touch(e, touches[0].pageX, touches[0].pageY)
 			const move = {
 				x: currentTouch.x - startTouch.x,
 				y: currentTouch.y - startTouch.y,
 			}
+			if (Math.abs(move.x) > 3 || Math.abs(move.y) > 3) currentGesture = Gestures.DRAG
+			if (debugCallback) debugCallback(`move ${move.x} ${move.y}`)
 			callbacks.move(move)
 			if (Math.abs(move.x) > 3 || Math.abs(move.y) > 3) clearTimeout(touchDelay)
 			return false
 		}
 		if (touches.length == 2) {
-			const currentPair = new TouchPair(touches)
+			const currentPair = new TouchPair(e, touches)
 			const angle = currentPair.angleSince(referencePair)
 			const scale = currentPair.scaleSince(referencePair)
 
@@ -80,6 +88,7 @@ function TransformRecognizer(element) {
 			}
 			const center = currentPair.center()
 			if (currentGesture == Gestures.ROTATE) {
+				if (debugCallback) debugCallback(`rotate ${angle} ${center.x} ${center.y}`)
 				callbacks.rotate({
 					rotation: angle,
 					x: center.x,
@@ -87,6 +96,7 @@ function TransformRecognizer(element) {
 				})
 			}
 			if (currentGesture == Gestures.SCALE) {
+				if (debugCallback) debugCallback(`scale ${scale} ${center.x} ${center.y}`)
 				callbacks.scale({
 					scale: scale,
 					x: center.x,
@@ -99,12 +109,13 @@ function TransformRecognizer(element) {
 
 	const mouseMoveHandler = (e) => {
 		e.preventDefault()
-		if (currentGesture != Gestures.DRAG) return
-		const currentTouch = new Touch(e.offsetX, e.offsetY)
-		callbacks.move({
-			x: currentTouch.x - startTouch.x,
-			y: currentTouch.y - startTouch.y,
-		})
+		if (currentGesture != Gestures.CLICK && currentGesture != Gestures.DRAG) return
+		const currentTouch = new Touch(undefined, e.offsetX, e.offsetY)
+		const x = currentTouch.x - startTouch.x
+		const y = currentTouch.y - startTouch.y
+		if (Math.abs(x) > 3 || Math.abs(y) > 3) currentGesture = Gestures.DRAG
+		if (debugCallback) debugCallback(`move ${x} ${y}`)
+		callbacks.move({ x, y })
 		return false
 	}
 
@@ -113,21 +124,32 @@ function TransformRecognizer(element) {
 		const touches = e.touches
 		clearTimeout(touchDelay)
 		if (touches.length < 2) {
+			if (currentGesture == Gestures.CLICK) {
+				if (debugCallback) debugCallback(`short ${startTouch.x} ${startTouch.y} ${0}`)
+				callbacks.short({ x: startTouch.x, y: startTouch.y, btn: 0 })
+			}
 			currentGesture = Gestures.NONE
 		}
+		if (debugCallback) debugCallback(`stop`)
 		callbacks.stop()
 		return false
 	}
 
 	const mouseEndHandler = (e) => {
 		e.preventDefault()
+		if (currentGesture == Gestures.CLICK) {
+			if (debugCallback) debugCallback(`short ${startTouch.x} ${startTouch.y} ${e.button}`)
+			callbacks.short({ x: startTouch.x, y: startTouch.y, btn: e.button })
+		}
 		currentGesture = Gestures.NONE
+		if (debugCallback) debugCallback(`stop`)
 		callbacks.stop()
 		return false
 	}
 
 	const wheelHandler = (e) => {
 		e.preventDefault()
+		if (debugCallback) debugCallback(`wheel ${e.deltaX} ${e.deltaY}`)
 		callbacks.wheel({
 			x: e.deltaX,
 			y: e.deltaY,
@@ -137,6 +159,7 @@ function TransformRecognizer(element) {
 
 	const contextMenuHandler = (e) => {
 		e.preventDefault()
+		if (debugCallback) debugCallback(`context ${e.clientX} ${e.clientY} ${e.shiftKey}`)
 		callbacks.context({
 			x: e.clientX,
 			y: e.clientY,
@@ -157,9 +180,9 @@ function TransformRecognizer(element) {
 	element.addEventListener('contextmenu', contextMenuHandler, { capture: true, passive: false })
 }
 
-function TouchPair(touchList) {
-	this.t1 = new Touch(touchList[0].pageX, touchList[0].pageY)
-	this.t2 = new Touch(touchList[1].pageX, touchList[1].pageY)
+function TouchPair(e, touchList) {
+	this.t1 = new Touch(e, touchList[0].pageX, touchList[0].pageY)
+	this.t2 = new Touch(e, touchList[1].pageX, touchList[1].pageY)
 }
 
 TouchPair.prototype.angleSince = function (referencePair) {
@@ -175,7 +198,7 @@ TouchPair.prototype.scaleSince = function (referencePair) {
 TouchPair.prototype.center = function () {
 	const x = (this.t1.x + this.t2.x) / 2
 	const y = (this.t1.y + this.t2.y) / 2
-	return new Touch(x, y)
+	return new Touch(undefined, x, y)
 }
 
 TouchPair.prototype.span = function () {
@@ -190,7 +213,11 @@ TouchPair.prototype.angle = function () {
 	return (Math.atan2(dy, dx) * 180) / Math.PI
 }
 
-function Touch(x, y) {
+function Touch(e, x, y) {
+	if (e) {
+		x -= e.target.x
+		y -= e.target.y
+	}
 	this.x = x
 	this.y = y
 }

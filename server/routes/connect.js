@@ -3,7 +3,9 @@ const storage = require('../services/storage')
 const tools = require('../services/tools')
 const { encode, parse } = require('../services/bson')
 
-const minimumModVersion = '0.1.6.0'
+const minimumModVersion = '0.2.0.0'
+
+// https://blog.stephencleary.com/2009/04/tcpip-net-sockets-faq.html
 
 var counter = 0
 var debugMainCommands = true
@@ -131,6 +133,11 @@ async function connect(ws, req) {
 			case 'menu':
 				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type}`)
 				peers.menu(client, msg.controller, msg.choices)
+				return
+
+			case 'selection':
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type}`)
+				peers.selection(client, msg.controller, msg.frame, msg.gizmos, msg.atlas)
 				return
 		}
 		console.log(`#${n} [game] unknown message '${msg.type}'`)

@@ -67,6 +67,14 @@ const action = (id) => {
 	stream.state('action', id)
 }
 
+const gizmos = (px, pz) => {
+	stream.state('select', `${px},${pz}`)
+}
+
+const gizmo = (id) => {
+	stream.state('gizmo', id)
+}
+
 export default {
 	joinGame,
 	leaveGame,
@@ -79,4 +87,6 @@ export default {
 	goto,
 	menu,
 	action,
+	gizmos,
+	gizmo,
 }

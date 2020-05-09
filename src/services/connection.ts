@@ -7,6 +7,7 @@ import jobs from './cmd_jobs'
 import menu from './cmd_menu'
 import ping from './cmd_ping'
 import portrait from './cmd_portrait'
+import selection from './cmd_selection'
 import settings from './cmd_settings'
 import state from './cmd_state'
 import status from './cmd_status'
@@ -32,6 +33,7 @@ const connect = () => {
 		menu.link(ws)
 		ping.link(ws)
 		portrait.link(ws)
+		selection.link(ws)
 		settings.link(ws)
 		state.link(ws)
 		status.link(ws)
@@ -49,6 +51,7 @@ const connect = () => {
 		menu.remove(e)
 		ping.remove(e)
 		portrait.remove(e)
+		selection.remove(e)
 		settings.remove(e)
 		state.remove(e)
 		status.remove(e)
@@ -71,6 +74,7 @@ const connect = () => {
 		menu.msg(msg)
 		ping.msg(msg)
 		portrait.msg(msg)
+		selection.msg(msg)
 		settings.msg(msg)
 		state.msg(msg)
 		status.msg(msg)
