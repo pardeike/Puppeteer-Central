@@ -10,9 +10,11 @@ export default function ActiveMenu(props) {
 	const load = () => {
 		setLoading(true)
 		jobs.sendJob(props.optionsCommand, props.optionsArgs, (res) => {
-			const results = res.results?.map((result) => ({ key: result.id, text: result.name, value: result.id })) ?? []
-			const opt = [{ key: -1, className: 'hidden-menu', value: -1 }, ...results]
-			setOptions(opt)
+			let opts = res.results?.map((result) => ({ key: result.id, text: result.name, value: result.id, active: result.selected })) ?? []
+			const idx = opts.findIndex((o) => o.active)
+			if (idx == -1) opts = [{ key: -1, className: 'hidden-menu', value: -1 }, ...opts]
+			else setValue(opts[idx].value)
+			setOptions(opts)
 			setLoading(false)
 		})
 	}

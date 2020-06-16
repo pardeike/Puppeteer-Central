@@ -59,6 +59,11 @@ export default function ColonistBasicCommands() {
 			<ActiveMenu placeholder="Weapons" optionsCommand="get-weapons" optionsArgs={['near']} actionCommand="select-weapon" actionArgs={[]} />
 			<div style={{ alignSelf: 'center', whiteSpace: 'nowrap' }}>Best:</div>
 			<ActiveMenu placeholder="Weapons" optionsCommand="get-weapons" optionsArgs={['best']} actionCommand="select-weapon" actionArgs={[]} />
+			<div className="basicCommandsColumnsHeader">Policies</div>
+			<div style={{ alignSelf: 'center', whiteSpace: 'nowrap' }}>Outfits:</div>
+			<ActiveMenu placeholder="Outfits" optionsCommand="get-outfits" optionsArgs={[]} actionCommand="select-outfit" actionArgs={[]} />
+			<div style={{ alignSelf: 'center', whiteSpace: 'nowrap' }}>Drugs:</div>
+			<ActiveMenu placeholder="Drugs" optionsCommand="get-drugs" optionsArgs={[]} actionCommand="select-drug" actionArgs={[]} />
 			<div className="basicCommandsColumnsHeader">Injuries</div>
 			<div style={{ alignSelf: 'center', whiteSpace: 'nowrap' }}>Rest:</div>
 			<ActiveMenu placeholder="Beds" optionsCommand="get-rest" optionsArgs={['rest']} actionCommand="do-rest" actionArgs={[]} />
