@@ -25,6 +25,7 @@ export default function ColonistOverview() {
 	const stateLink = useStateLink(state.ref)
 	const timeInfoLink = useStateLink(timeInfo.ref)
 	const colonistLink = useStateLink(colonist.ref)
+	const isAvailableLink = useStateLink(colonist.isAvailableRef)
 	const DOMPurify = createDOMPurify(window)
 
 	const canvasRef = createRef()
@@ -125,33 +126,42 @@ export default function ColonistOverview() {
 					<div>
 						{timeInfoLink.value.time}, {speedTags[timeInfoLink.value.speed]}
 					</div>
-					<canvas
-						ref={canvasRef}
-						width={mapSize}
-						height={mapSize}
-						style={{ position: 'absolute', right: 14, top: 14, width: '64px', height: '64px' }}></canvas>
+					{isAvailableLink.value ? (
+						<canvas
+							ref={canvasRef}
+							width={mapSize}
+							height={mapSize}
+							style={{ position: 'absolute', right: 14, top: 14, width: '64px', height: '64px' }}></canvas>
+					) : (
+						<div />
+					)}
 				</div>
-				<div style={{ ...nGrid('repeat(4, auto)'), paddingTop: '10px' }}>
-					{percentageBar(colonistLink.value.health, 'health')}
-					{percentageBar(colonistLink.value.mood, 'mood', 0.4)}
-					{colorBar(colonistLink.value.restrict, 'schedule')}
-					<Dropdown
-						icon={<div />}
-						trigger={colorBar(colonistLink.value.area, 'zone')}
-						options={getZoneOptions()}
-						value={colonistLink.value.area.label}
-						onChange={(_e, data) => commands.setZone(data.value)}
-					/>
-				</div>
-				{colonistLink.value.bleedingRate > 1 ? (
-					<div style={{ ...nGrid('auto auto'), paddingTop: '10px' }}>
-						<b>Bleeding: {colonistLink.value.bleedingRate}% per day</b>
-						{colonistLink.value.deathIn < 24 ? (
-							<b style={{ textAlign: 'right' }}>Death in {colonistLink.value.deathIn} hours</b>
-						) : (
-							<div style={{ textAlign: 'right' }}>No immediate danger</div>
-						)}
-					</div>
+				{isAvailableLink.value ? (
+					<React.Fragment>
+						<div style={{ ...nGrid('repeat(4, auto)'), paddingTop: '10px' }}>
+							{percentageBar(colonistLink.value.health, 'health')}
+							{percentageBar(colonistLink.value.mood, 'mood', 0.4)}
+							{colorBar(colonistLink.value.restrict, 'schedule')}
+							<Dropdown
+								className="restrictions"
+								icon={<div />}
+								trigger={colorBar(colonistLink.value.area, 'zone')}
+								options={getZoneOptions()}
+								value={colonistLink.value.area.label}
+								onChange={(_e, data) => commands.setZone(data.value)}
+							/>
+						</div>
+						{colonistLink.value.bleedingRate > 1 ? (
+							<div style={{ ...nGrid('auto auto'), paddingTop: '10px' }}>
+								<b>Bleeding: {colonistLink.value.bleedingRate}% per day</b>
+								{colonistLink.value.deathIn < 24 ? (
+									<b style={{ textAlign: 'right' }}>Death in {colonistLink.value.deathIn} hours</b>
+								) : (
+									<div style={{ textAlign: 'right' }}>No immediate danger</div>
+								)}
+							</div>
+						) : undefined}
+					</React.Fragment>
 				) : undefined}
 			</Segment>
 		</Segment.Group>

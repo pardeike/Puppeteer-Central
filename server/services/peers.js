@@ -280,6 +280,15 @@ function assignment(client, viewer, state) {
 	}
 }
 
+function availability(client, viewer, state) {
+	try {
+		const json = { type: 'colonist-available', state }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => safeClientSend(c, json))
+	} catch (err) {
+		console.log(`### availability error: ${err}`)
+	}
+}
+
 function streamerChange(client) {
 	try {
 		const json = { type: 'streamer', streamer: publicClient(client) }
@@ -373,6 +382,7 @@ module.exports = {
 	gameMessage,
 	colonists,
 	assignment,
+	availability,
 	streamerChange,
 	setClientState,
 	setGameState,

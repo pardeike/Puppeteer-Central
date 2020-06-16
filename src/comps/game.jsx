@@ -15,6 +15,7 @@ import ColonistInjuries from './ux/colonist-injuries'
 
 export default function Game() {
 	const colonistFlagsLink = useStateLink(colonist.flagsRef)
+	const isAvailableLink = useStateLink(colonist.isAvailableRef)
 
 	const menu = (name, enabled, content) => ({
 		menuItem: (
@@ -46,7 +47,7 @@ export default function Game() {
 		<React.Fragment>
 			<GameHeader />
 			<ColonistOverview />
-			{colonistFlagsLink.value.assigned ? (
+			{colonistFlagsLink.value.assigned && isAvailableLink.value ? (
 				<Segment.Group>
 					<Segment>
 						<Tab panes={panes} />

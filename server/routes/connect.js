@@ -115,6 +115,10 @@ async function connect(ws, req) {
 				peers.gameMessage(msg.type, msg.viewer, msg.info)
 				return
 
+			case 'colonist-available':
+				peers.availability(client, msg.viewer, msg.state)
+				return
+
 			case 'state':
 				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.key} ${JSON.stringify(msg.val)}`)
 				peers.setClientState(client, msg.viewer, msg.key, msg.val)

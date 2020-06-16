@@ -76,3 +76,6 @@ element {
 .hidden-menu {
 	display: none !important;
 }
+.restrictions div {
+	height: 100%;
+}
