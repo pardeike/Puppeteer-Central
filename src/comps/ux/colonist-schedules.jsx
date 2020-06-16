@@ -64,12 +64,14 @@ export default function ColonisSchedules() {
 	const schedColors = {
 		A: [150, 150, 150],
 		W: [136, 136, 33],
+		M: [85, 185, 85],
 		J: [122, 65, 156],
 		S: [60, 60, 220],
 	}
 	const schedNames = {
 		A: 'Anything',
 		W: 'Work',
+		M: 'Meditate',
 		J: 'Recreation',
 		S: 'Sleep',
 	}
@@ -201,7 +203,7 @@ export default function ColonisSchedules() {
 			</div>
 			<div style={{ textAlign: 'center' }}>
 				<Button.Group as="span" compact size="mini">
-					{['A', 'W', 'J', 'S'].map((ch) => {
+					{['A', 'W', 'M', 'J', 'S'].map((ch) => {
 						const c = buttonColor(ch, scheduleType == ch)
 						const bgColor = colors.rgb(c)
 						const fgColor = colors.bwContrast(c)
