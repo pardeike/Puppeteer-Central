@@ -3,6 +3,7 @@ import { createStateLink } from '@hookstate/core'
 const initialValue = {
 	version: '',
 	mapFreq: 0,
+	features: [],
 }
 const ref = createStateLink(initialValue)
 
