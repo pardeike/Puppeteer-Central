@@ -70,7 +70,7 @@ export default function Settings01(props) {
 							</p>
 							<p>To find the directory, copy this path to a file window:</p>
 							<Label style={box}>
-								<b>%LocalAppData%\..\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\Config</b>
+								<b style={{ userSelect: 'text' }}>%LocalAppData%\..\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\Config</b>
 							</Label>
 							<p>
 								<span style={{ color: 'red' }}>Beware:</span> this file is very sensitive. Do not show or copy it to anybody else!
