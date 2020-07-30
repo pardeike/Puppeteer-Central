@@ -3,9 +3,11 @@ import { useStateLink } from '@hookstate/core'
 import state from '../../services/cmd_state'
 import colors from '../../colors'
 import commands from '../../commands'
+import game from '../../services/cmd_game-info'
 import { Button } from 'semantic-ui-react'
 
 export default function ColonisSchedules() {
+	const gameLink = useStateLink(game.ref)
 	const stateLink = useStateLink(state.ref)
 	const [scheduleType, setScheduleType] = useState('A')
 
@@ -59,6 +61,9 @@ export default function ColonisSchedules() {
 		whiteSpace: 'nowrap',
 		lineHeight: '1.5em',
 	}
+
+	var scheduleTypes = ['A', 'W', /*'M',*/ 'J', 'S']
+	if (gameLink.value.features.indexOf('royalty') > -1) scheduleTypes.splice(2, 0, 'M')
 
 	const prioColors = ['transparent', '#ddd', '#0c0', '#bb0', '#e81', '#888']
 	const schedColors = {
@@ -203,7 +208,7 @@ export default function ColonisSchedules() {
 			</div>
 			<div style={{ textAlign: 'center' }}>
 				<Button.Group as="span" compact size="mini">
-					{['A', 'W', 'M', 'J', 'S'].map((ch) => {
+					{scheduleTypes.map((ch) => {
 						const c = buttonColor(ch, scheduleType == ch)
 						const bgColor = colors.rgb(c)
 						const fgColor = colors.bwContrast(c)
