@@ -40,9 +40,9 @@
 		"nodemon-webpack-plugin": "4.3.2",
 		"passport": "0.4.1",
 		"passport-youtube-v3": "2.1.0",
-		"react-image": "4.0.3",
+		"react-image": "2.4.0",
 		"regenerator-runtime": "0.13.7",
-		"semantic-ui-react": "1.1.0",
+		"semantic-ui-react": "0.88.2",
 		"utf-8-validate": "5.0.2",
 		"uuid": "8.3.0"
 	},
