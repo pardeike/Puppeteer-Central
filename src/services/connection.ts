@@ -1,4 +1,5 @@
 import assignment from './cmd_assignment'
+import chat from './cmd_chat'
 import colonist from './cmd_colonist'
 import earn from './cmd_earn'
 import gameinfo from './cmd_game-info'
@@ -25,6 +26,7 @@ const connect = () => {
 	ws.binaryType = 'arraybuffer'
 	ws.onopen = () => {
 		assignment.link(ws)
+		chat.link(ws)
 		colonist.link(ws)
 		earn.link(ws)
 		gameinfo.link(ws)
@@ -43,6 +45,7 @@ const connect = () => {
 	}
 	ws.onclose = (e) => {
 		assignment.remove(e)
+		chat.remove(e)
 		colonist.remove(e)
 		earn.remove(e)
 		gameinfo.remove(e)
@@ -66,6 +69,7 @@ const connect = () => {
 		//if (debug && 'portrait,earn,colonist-basics'.indexOf(msg['type']) == -1)
 		//	console.log(`--> ${msg['type'].toUpperCase()} ${Object.keys(msg).join(' ')}`)
 		assignment.msg(msg)
+		chat.msg(msg)
 		colonist.msg(msg)
 		earn.msg(msg)
 		gameinfo.msg(msg)

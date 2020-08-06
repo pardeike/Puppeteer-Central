@@ -8,7 +8,7 @@ const minimumModVersion = '0.2.0.0'
 // https://blog.stephencleary.com/2009/04/tcpip-net-sockets-faq.html
 
 var counter = 0
-var debugMainCommands = true
+var debugMainCommands = false
 var debugCommonCommands = false
 
 var defaultSettings = {
@@ -143,6 +143,11 @@ async function connect(ws, req) {
 				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type}`)
 				peers.selection(client, msg.controller, msg.frame, msg.gizmos, msg.atlas)
 				return
+
+			case 'chat':
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type}`)
+				peers.outgoingChat(client, msg.viewer, msg.message)
+				return
 		}
 		console.log(`#${n} [game] unknown message '${msg.type}'`)
 	}
@@ -185,6 +190,11 @@ async function connect(ws, req) {
 			case 'job':
 				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.id} ${msg.method} ${JSON.stringify(msg.args)}`)
 				peers.runJob(client, msg.id, msg.method, msg.args)
+				return
+
+			case 'chat':
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.message}`)
+				peers.incomingChat(client, msg.message)
 				return
 		}
 		console.log(`#${n} [client] unknown message '${msg.type}'`)

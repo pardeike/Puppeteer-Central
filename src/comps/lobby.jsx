@@ -43,6 +43,11 @@ export default function Lobby() {
 		gridTemplateColumns: 'auto auto minmax(1%,90%) auto',
 	}
 
+	const stats = {
+		position: 'relative',
+		top: '2px',
+	}
+
 	const Streamer = (prop) => {
 		const streamer = prop.streamer
 
@@ -88,13 +93,22 @@ export default function Lobby() {
 				</Card.Content>
 				<Card.Content extra>
 					<div style={buttonGrid}>
-						<Label size={buttonSize} style={minButton}>
-							{streamer.viewers} Viewers
-						</Label>
-						{streamer.info.matureOnly ? (
-							<Label size={buttonSize} color="red" style={minButton}>
-								Mature Content
+						<div>
+							<Label basic image style={{ border: 0 }}>
+								<img src="/i/puppet.png" height="26" />
+								<span style={stats}>{streamer.puppets}</span>
 							</Label>
+							<Label basic image style={{ border: 0 }}>
+								<img src="/i/colonist.png" height="26" />
+								<span style={stats}>{streamer.colonists}</span>
+							</Label>
+						</div>
+						{streamer.info.matureOnly ? (
+							<div style={{ marginTop: 'auto', marginBottom: 'auto' }}>
+								<Label size="mini" color="red">
+									<span style={{ fontSize: '1.2em' }}>Mature</span>
+								</Label>
+							</div>
 						) : (
 							<div style={minButton} />
 						)}

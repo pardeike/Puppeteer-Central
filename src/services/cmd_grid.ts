@@ -1,7 +1,6 @@
 import { createStateLink } from '@hookstate/core'
 import tools from '../tools'
 
-var ws = undefined
 let mapUpdatedCallback = undefined
 
 const initialValue = {
@@ -18,9 +17,7 @@ const initialValue = {
 }
 const ref = createStateLink(initialValue)
 
-const link = (_ws) => {
-	ws = _ws
-}
+const link = (_ws) => {}
 
 const msg = (msg) => {
 	if (msg.type == 'grid') {
@@ -39,10 +36,6 @@ const setMapUpdateCallback = (cb) => {
 	mapUpdatedCallback = cb
 }
 
-const draftTo = (x, z) => {
-	tools.send(ws, 'draft-to', { x, z })
-}
-
 export default {
 	ref,
 	link,
@@ -51,5 +44,4 @@ export default {
 	reset,
 	//
 	setMapUpdateCallback,
-	draftTo,
 }

@@ -9,13 +9,16 @@ import ColonistOverview from './ux/colonist-overview'
 import ColonistSchedules from './ux/colonist-schedules'
 import ColonistSkills from './ux/colonist-skills'
 import ColonistThoughts from './ux/colonist-thoughts'
+import TwitchToolkit from './ux/colonist-toolkit'
 import GameHeader from './ux/game-header'
 import colonist from '../services/cmd_colonist'
 import ColonistInjuries from './ux/colonist-injuries'
+import game from '../services/cmd_game-info'
 
 export default function Game() {
 	const colonistFlagsLink = useStateLink(colonist.flagsRef)
 	const isAvailableLink = useStateLink(colonist.isAvailableRef)
+	const gameLink = useStateLink(game.ref)
 
 	const menu = (name, enabled, content) => ({
 		menuItem: (
@@ -26,7 +29,7 @@ export default function Game() {
 		render: () => (enabled ? content : undefined),
 	})
 
-	const panes = [
+	let panes = [
 		menu('state', true, <ColonistBasicCommands />),
 		menu('combat', true, <ColonistCombat />),
 		menu(
@@ -41,7 +44,9 @@ export default function Game() {
 		menu('mind', colonistFlagsLink.value.thoughts, <ColonistThoughts />),
 		menu('skill', colonistFlagsLink.value.skills, <ColonistSkills />),
 		menu('schedule', true, <ColonistSchedules />),
+		// optional twitch toolkit position
 	]
+	if (gameLink.value.features.indexOf('twitch-toolkit') > -1) panes.push(menu('toolkit', true, <TwitchToolkit />))
 
 	return (
 		<React.Fragment>
