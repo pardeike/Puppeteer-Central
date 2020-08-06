@@ -55,10 +55,12 @@ export default function GameHeader() {
 					<Image circular src={streamerPic} style={imageStyle} /> {streamer?.user.name ?? ''}
 				</Button>
 			</Header>
-			<Label image circular style={coinLabelStyle}>
-				<img src="/i/coin.png" />
-				{earnLink.value >= 0 ? <b style={coinTextStyle}>{earnLink.value}</b> : <Loader active inline size="mini" style={coinSpinnerStyle} />}
-			</Label>
+			{gameLink.value.features.indexOf('twitch-toolkit') > -1 && (
+				<Label image circular style={coinLabelStyle}>
+					<img src="/i/coin.png" />
+					{earnLink.value >= 0 ? <b style={coinTextStyle}>{earnLink.value}</b> : <Loader active inline size="mini" style={coinSpinnerStyle} />}
+				</Label>
+			)}
 		</React.Fragment>
 	)
 }
