@@ -5,12 +5,14 @@ import commands from '../../commands'
 import earn from '../../services/cmd_earn'
 import settings from '../../services/cmd_settings'
 import streamers from '../../services/cmd_streamers'
+import game from '../../services/cmd_game-info'
 import tools from '../../tools'
 
 export default function GameHeader() {
 	const earnLink = useStateLink(earn.ref)
 	const settingsLink = useStateLink(settings.ref)
 	const streamersLink = useStateLink(streamers.ref)
+	const gameLink = useStateLink(game.ref)
 
 	const viewing = settingsLink.value.viewing
 	const streamer = viewing ? streamersLink.value.find((s) => s.user.id == viewing.id && s.user.service == viewing.service) : undefined
