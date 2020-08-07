@@ -40,7 +40,7 @@ export default function Lobby() {
 	const buttonGrid = {
 		display: 'grid',
 		gridColumnGap: '4px',
-		gridTemplateColumns: 'auto auto minmax(1%,90%) auto',
+		gridTemplateColumns: 'auto 25%',
 	}
 
 	const stats = {
@@ -71,9 +71,11 @@ export default function Lobby() {
 
 		return (
 			<Card>
-				<Image wrapped ui={false} onClick={() => commands.joinGame(streamer.user)} style={{ cursor: 'pointer' }}>
-					<Img src={previewURL(streamer.user)} loader={<img src="/i/preview.jpg" />} />
-				</Image>
+				{streamer.stream && (
+					<Image wrapped ui={false} onClick={() => commands.joinGame(streamer.user)} style={{ cursor: 'pointer' }}>
+						<Img src={previewURL(streamer.user)} loader={<img src="/i/preview.jpg" />} />
+					</Image>
+				)}
 				<Card.Content>
 					<Image floated="right" size="mini" src={streamer.user.picture} circular />
 					<Card.Header>
@@ -88,31 +90,36 @@ export default function Lobby() {
 					</Card.Header>
 					<Card.Meta>Online since {tools.ago(streamer.info.started)}</Card.Meta>
 					<Card.Description>
-						<b>{streamer.info.title || 'Untitled'}</b>
+						<b>
+							{streamer.info?.title || streamer.stream?.title || 'Untitled'}{' '}
+							{streamer.info.matureOnly && <span style={{ color: 'red' }}>&nbsp;(Mature)</span>}
+						</b>
+						{streamer.stream?.description && (
+							<React.Fragment>
+								<br />
+								<span style={{ fontSize: '0.9em' }}>{streamer.stream.description}</span>
+							</React.Fragment>
+						)}
 					</Card.Description>
 				</Card.Content>
 				<Card.Content extra>
 					<div style={buttonGrid}>
-						<div>
-							<Label basic image style={{ border: 0 }}>
-								<img src="/i/puppet.png" height="26" />
-								<span style={stats}>{streamer.puppets}</span>
-							</Label>
+						<div style={{ border: 0 }}>
+							{streamer.stream && (
+								<Label basic image style={{ border: 0 }}>
+									<img src="/i/viewer.png" height="26" />
+									<span style={stats}>{streamer.stream?.count ?? 0}</span>
+								</Label>
+							)}
 							<Label basic image style={{ border: 0 }}>
 								<img src="/i/colonist.png" height="26" />
 								<span style={stats}>{streamer.colonists}</span>
 							</Label>
+							<Label basic image style={{ border: 0 }}>
+								<img src="/i/puppet.png" height="26" />
+								<span style={stats}>{streamer.puppets}</span>
+							</Label>
 						</div>
-						{streamer.info.matureOnly ? (
-							<div style={{ marginTop: 'auto', marginBottom: 'auto' }}>
-								<Label size="mini" color="red">
-									<span style={{ fontSize: '1.2em' }}>Mature</span>
-								</Label>
-							</div>
-						) : (
-							<div style={minButton} />
-						)}
-						<div />
 						<Label size={buttonSize} color="green" style={joinStyle} onClick={() => commands.joinGame(streamer.user)}>
 							Join
 						</Label>

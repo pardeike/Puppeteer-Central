@@ -72,7 +72,7 @@ async function helloViewer(n, user, ws) {
 	}
 	ws.sendEncoded({ type: 'status', status })
 	ws.sendEncoded({ type: 'settings', settings })
-	const streamers = peers.availableStreamers()
+	const streamers = await peers.availableStreamers()
 	ws.sendEncoded({ type: 'streamers', streamers })
 	return client
 }

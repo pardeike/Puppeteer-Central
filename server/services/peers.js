@@ -1,4 +1,5 @@
 const tools = require('./tools')
+const twitch = require('./twitch')
 const { encode } = require('./bson')
 
 const peersDebugging = false
@@ -204,17 +205,6 @@ function findClient(user) {
 	}
 }
 
-function availableStreamers() {
-	try {
-		return clients
-			.filter(serverAvailable)
-			.map((c) => publicClient(c))
-			.sort((a, b) => (a.puppets == b.puppets ? a.colonists > b.colonists : a.puppets > b.puppets))
-	} catch (err) {
-		methodError('availableStreamers', err)
-	}
-}
-
 function getViewers(user, search) {
 	try {
 		var streamer = findClient(user)
@@ -316,9 +306,27 @@ function availability(client, viewer, state) {
 	}
 }
 
-function streamerChange(client) {
+async function availableStreamers() {
 	try {
-		const json = { type: 'streamer', streamer: publicClient(client) }
+		let streamers = clients.filter(serverAvailable).map((c) => publicClient(c))
+		var ids = streamers.map((streamer) => streamer.user.id)
+		var infos = await twitch.streamInfo(ids)
+		streamers.forEach((streamer) => {
+			streamer.stream = infos.find((info) => info.id == streamer.user.id).info
+		})
+		// sort((a, b) => (a.puppets == b.puppets ? a.colonists > b.colonists : a.puppets > b.puppets))
+		return streamers.sort((a, b) => (a.stream ? a.stream.count : 0) > (b.stream ? b.stream.count : 0))
+	} catch (err) {
+		methodError('availableStreamers', err)
+	}
+}
+
+async function streamerChange(client) {
+	try {
+		let streamer = publicClient(client)
+		var infos = await twitch.streamInfo([streamer.user.id])
+		streamer.stream = infos[0].info
+		const json = { type: 'streamer', streamer }
 		clients.forEach((c) => safeClientSend(c, json, true))
 	} catch (err) {
 		methodError('streamerChange', err)
@@ -422,7 +430,6 @@ module.exports = {
 	removeClient,
 	removeGame,
 	findClient,
-	availableStreamers,
 	getViewers,
 	assign,
 	disconnectViewers,
@@ -432,6 +439,7 @@ module.exports = {
 	colonists,
 	assignment,
 	availability,
+	availableStreamers,
 	streamerChange,
 	setClientState,
 	setGameState,
