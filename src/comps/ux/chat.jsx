@@ -38,7 +38,7 @@ export default function Chat() {
 						compact>
 						<b>{msg.message}</b>
 						{msg.message && <br />}
-						<span style={{ textTransform: 'capitalize' }}>{msg.result}</span>
+						<span style={{ textTransform: 'capitalize', userSelect: 'text' }}>{msg.result}</span>
 					</Message>
 				))}
 		</React.Fragment>

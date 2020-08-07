@@ -1,6 +1,6 @@
 import React, { useEffect, createRef, useState } from 'react'
 import { Form, Menu, Popup } from 'semantic-ui-react'
-import { useStateLink } from '@hookstate/core'
+import { createStateLink, useStateLink } from '@hookstate/core'
 import commands from '../../commands'
 import game from '../../services/cmd_game-info'
 import colonist from '../../services/cmd_colonist'
@@ -21,6 +21,9 @@ let newFrame = { x1: -1, z1: -1, x2: -1, z2: -1 }
 let mapTimer = undefined
 //let debugState = []
 
+const scrollLockedRef = createStateLink(true)
+const isMobileFormFactorRef = createStateLink(false)
+
 export default function ColonistCombat() {
 	const gameLink = useStateLink(game.ref)
 	const isDraftedLink = useStateLink(colonist.isDraftedRef)
@@ -31,6 +34,16 @@ export default function ColonistCombat() {
 	const [autoFollow, setAutoFollow] = useState(true)
 	const [popupCoordinates, setPopupCoordinates] = useState({ x: -1, y: -1 })
 	const [newFrameTrigger, setNewFrameTrigger] = useState({})
+
+	const scrollLockedLink = useStateLink(scrollLockedRef)
+	const isMobileFormFactorLink = useStateLink(isMobileFormFactorRef)
+
+	useEffect(() => {
+		const resizeWindow = () => isMobileFormFactorLink.access().set(window.innerWidth < 650)
+		resizeWindow()
+		window.addEventListener('resize', resizeWindow)
+		return () => window.removeEventListener('resize', resizeWindow)
+	}, [])
 
 	let mapFrequency = gameLink.value.mapFreq
 	if (mapFrequency == 0) mapFrequency = 400
@@ -196,7 +209,7 @@ export default function ColonistCombat() {
 				zoom((e.scale - 1) * -20)
 			})
 			recognizer.onEvent('move', (e) => {
-				move(e.x, e.y)
+				if (!scrollLockedLink.access().get() || !isMobileFormFactorLink.access().get()) move(e.x, e.y)
 			})
 			recognizer.onEvent('short', (e) => {
 				if (e.btn == 0) select(map, e.x, e.y)
@@ -244,7 +257,7 @@ export default function ColonistCombat() {
 		paddingBottom: 10,
 		display: 'grid',
 		columnGap: '10px',
-		gridTemplateColumns: 'minmax(25%, auto) min-content min-content',
+		gridTemplateColumns: (isMobileFormFactorLink.access().get() ? 'min-content ' : '') + 'minmax(25%, auto) min-content min-content',
 	}
 
 	const gizmoStyle = (g) => ({
@@ -261,6 +274,15 @@ export default function ColonistCombat() {
 	return (
 		<React.Fragment>
 			<div style={topGrid}>
+				{isMobileFormFactorLink.access().get() && (
+					<img
+						style={{ marginTop: 3 }}
+						src={`/i/${scrollLockedLink.access().get() ? 'locked' : 'unlocked'}.png`}
+						width="26"
+						height="26"
+						onClick={() => scrollLockedLink.access().set(!scrollLockedLink.access().get())}
+					/>
+				)}
 				<Form.Input min={0} max={1} name="Scale" onChange={slider} step={0.01} type="range" style={{ width: '100%' }} value={scale} />
 				<Button size="mini" color={isDraftedLink.value ? 'red' : 'green'} onClick={() => commands.setDraftModus(!isDraftedLink.value)}>
 					{isDraftedLink.value ? 'Undraft' : 'Draft'}
@@ -287,7 +309,7 @@ export default function ColonistCombat() {
 					vertical
 				/>
 			</Popup>
-			<div style={{ display: 'grid', gridColumnGap: 8, gridTemplateColumns: `repeat(auto-fill, ${gizmoSize}px)` }}>
+			<div style={{ minHeight: 120, display: 'grid', gridColumnGap: 8, gridTemplateColumns: `repeat(auto-fill, ${gizmoSize}px)` }}>
 				{selectionLink.nested.gizmos.value.map((gizmo, i) => {
 					return (
 						<div key={gizmo.id} style={{ paddingTop: '10px' }}>

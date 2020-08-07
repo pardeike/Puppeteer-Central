@@ -11,7 +11,7 @@ export default function Viewer(props) {
 	const searchFieldRef = createRef()
 
 	const viewersRef = createStateLink([])
-	const viewersLinks = useStateLink(viewersRef)
+	const viewersLink = useStateLink(viewersRef)
 
 	const pickResult = ({ _title, id, service, name, picture }) => {
 		const viewer = { id, service, name, picture }
@@ -26,7 +26,7 @@ export default function Viewer(props) {
 
 	const updateResults = (val) => {
 		setSearch(val)
-		const list = viewersLinks.value
+		const list = viewersLink.value
 			.filter((v) => v.name.toLowerCase().indexOf(val.toLowerCase()) != -1)
 			.map((v) => ({
 				title: v.name,
@@ -65,7 +65,7 @@ export default function Viewer(props) {
 			setInitialized(true)
 			const response = await fetch('/viewers')
 			const viewers = await response.json()
-			viewersLinks.set(viewers)
+			viewersLink.set(viewers)
 		}
 		if (search != undefined && !initialized) fetchViewers()
 		// no cleanup here
@@ -78,7 +78,7 @@ export default function Viewer(props) {
 					size="mini"
 					fluid
 					selectFirstResult={true}
-					loading={viewersLinks.value.length == 0}
+					loading={viewersLink.value.length == 0}
 					onBlur={endSearch}
 					onResultSelect={(_e, o) => pickResult(o.result)}
 					onSearchChange={(_e, o) => updateResults(o.value)}

@@ -59,6 +59,7 @@ export default function Game() {
 					</Segment>
 				</Segment.Group>
 			) : undefined}
+			<div style={{ height: 10 }} />
 		</React.Fragment>
 	)
 }
