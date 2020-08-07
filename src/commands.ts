@@ -10,14 +10,14 @@ const joinGame = (user) => {
 		id: user.id,
 		service: user.service,
 	}
-	//console.log(`--> join game ${user.service}:${user.id}`)
+	//console.log(`=> join game ${user.service}:${user.id}`)
 	stream.join(userCreds)
 	settings.update('viewing', userCreds)
 	tools.goto('game')
 }
 
 const leaveGame = (fully) => {
-	//console.log(`--> leave game${fully ? ' fully' : ''}`)
+	//console.log(`=> leave game${fully ? ' fully' : ''}`)
 	if (fully) {
 		settings.update('viewing', {
 			id: undefined,

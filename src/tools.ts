@@ -2,7 +2,7 @@ import routesRef from './hooks/routes'
 import { v4 as uuidv4 } from 'uuid'
 import { BSON } from 'bsonfy'
 
-const version = 'v1.1.0'
+const version = 'v1.2.0'
 
 let _firstTime = true
 const firstTime = () => {
@@ -12,7 +12,7 @@ const firstTime = () => {
 }
 
 const send = (ws, type, obj) => {
-	// if (type != 'ping') console.log(`<-- ${type.toUpperCase()} ${Object.keys(obj).join(' ')}`)
+	// if (type != 'ping') console.log(`<= ${type.toUpperCase()} ${/*debugValue*/ JSON.stringify(obj)}`)
 	ws.send(BSON.serialize({ ...obj, type }))
 }
 
@@ -55,6 +55,12 @@ const boxValue = (n, min, max) => {
 	return Math.min(max, Math.max(min, n))
 }
 
+const debugValue = (obj) => {
+	if (Array.isArray(obj)) return `[${obj.map((e) => debugValue(e)).join(',')}]`
+	if (typeof obj == 'string') return obj
+	return `{${Object.keys(obj).join(',')}}`
+}
+
 const defaultAvatar =
 	'data:image/gif;base64,R0lGODlhGAAYAKIAAN3d3aqqqoiIiJmZmbu7u8zMzHd3dwAAACH5BAAAAAAALAAAAAAYABgAAANVCLrc/jDKSau9sYQdCgZcGFxiSFhlWGnp5k1Eu50T276SneKSPFaxFK0yKA0wgyIniTQkBwLnhSCIGq7VISQGrXq/RQJPQf2az9rFee2NsM+Ut+CRAAA7'
 
@@ -68,5 +74,6 @@ export default {
 	goto,
 	dataURL,
 	boxValue,
+	debugValue,
 	defaultAvatar,
 }

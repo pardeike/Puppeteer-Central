@@ -3,21 +3,14 @@ import { Header, Button, Label, Image, Loader, Icon } from 'semantic-ui-react'
 import { useStateLink } from '@hookstate/core'
 import commands from '../../commands'
 import earn from '../../services/cmd_earn'
-import settings from '../../services/cmd_settings'
-import streamers from '../../services/cmd_streamers'
 import game from '../../services/cmd_game-info'
 import tools from '../../tools'
 
-export default function GameHeader() {
+export default function GameHeader(props) {
 	const earnLink = useStateLink(earn.ref)
-	const settingsLink = useStateLink(settings.ref)
-	const streamersLink = useStateLink(streamers.ref)
 	const gameLink = useStateLink(game.ref)
 
-	const viewing = settingsLink.value.viewing
-	const streamer = viewing ? streamersLink.value.find((s) => s.user.id == viewing.id && s.user.service == viewing.service) : undefined
-
-	const streamerPic = streamer?.user.picture ?? tools.defaultAvatar
+	const streamerPic = props.streamer?.user.picture ?? tools.defaultAvatar
 
 	const imageStyle = {
 		width: '24px',
@@ -54,7 +47,7 @@ export default function GameHeader() {
 					labelPosition="left"
 					style={{ backgroundColor: 'white', fontSize: '0.8em', paddingTop: '6px', paddingBottom: '3px' }}>
 					<Icon name="left arrow" />
-					<Image circular src={streamerPic} style={imageStyle} /> {streamer?.user.name ?? ''}
+					<Image circular src={streamerPic} style={imageStyle} /> {props.streamer?.user.name ?? ''}
 				</Button>
 			</Header>
 			{gameLink.value.features.indexOf('twitch-toolkit') > -1 && (

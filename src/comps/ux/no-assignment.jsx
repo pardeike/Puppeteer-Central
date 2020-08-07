@@ -1,8 +1,12 @@
 import React from 'react'
 import Chat from './chat'
 import { Dimmer, Placeholder, Segment, Loader } from 'semantic-ui-react'
+import { useStateLink } from '@hookstate/core'
+import game from '../../services/cmd_game-info'
 
 export default function NoAssignment() {
+	const gameLink = useStateLink(game.ref)
+
 	return (
 		<Segment.Group>
 			<Segment basic style={{ backgroundColor: 'white' }}>
@@ -18,9 +22,11 @@ export default function NoAssignment() {
 					</Placeholder.Header>
 				</Placeholder>
 			</Segment>
-			<Segment compact style={{ backgroundColor: 'white' }}>
-				<Chat />
-			</Segment>
+			{gameLink.value.features.indexOf('twitch-toolkit') > -1 && (
+				<Segment compact style={{ backgroundColor: 'white' }}>
+					<Chat />
+				</Segment>
+			)}
 		</Segment.Group>
 	)
 }

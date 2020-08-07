@@ -27,7 +27,11 @@ async function helloGame(n, user, ws) {
 		console.log(`#${n} game not whitelisted`)
 		return undefined
 	}
-	if (debugMainCommands) console.log(`NEW GAME #${n} ${user.service}:${user.id}:${user.game}`)
+	if (debugMainCommands) {
+		console.log('')
+		console.log('----------------------------------')
+		console.log(`NEW GAME #${n} ${user.service}:${user.id}:${user.game}`)
+	}
 	var client = peers.findClient(user)
 	if (!client) {
 		if (debugMainCommands) console.log(`#${n} adding default viewer`)
@@ -44,15 +48,21 @@ async function helloGame(n, user, ws) {
 	}
 	if (debugMainCommands) console.log(`#${n} adding game`)
 	peers.addGame(client, ws)
-	ws.sendEncoded({ type: 'welcome', minVersion: minimumModVersion })
+	setTimeout(async () => {
+		ws.sendEncoded({ type: 'welcome', minVersion: minimumModVersion })
+	}, 0)
 	return client
 }
 
 async function helloViewer(n, user, ws) {
-	if (debugMainCommands) console.log(`NEW VIEWER #${n} ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
+	if (debugMainCommands) {
+		console.log('')
+		console.log('----------------------------------')
+		console.log(`NEW VIEWER #${n} ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
+	}
 	let settings = await storage.read(user)
 	if (!settings || !settings.info) settings = defaultSettings
-	if (debugCommonCommands) console.log(`#${n} settings: ${JSON.stringify(settings)}`)
+	if (debugCommonCommands) console.log(`#${n} settings: ${tools.debugValue(settings)}`)
 	const info = settings.info
 	if (debugMainCommands) console.log(`#${n} adding viewer ${user.service}:${user.id}:${user.name}:${user.picture ? 'pic' : 'nopic'}`)
 	const client = peers.addClient('VIEWER', user, {
@@ -70,10 +80,12 @@ async function helloViewer(n, user, ws) {
 		game: client.game,
 		viewers: client.viewers.length,
 	}
-	ws.sendEncoded({ type: 'status', status })
-	ws.sendEncoded({ type: 'settings', settings })
-	const streamers = await peers.availableStreamers()
-	ws.sendEncoded({ type: 'streamers', streamers })
+	setTimeout(async () => {
+		ws.sendEncoded({ type: 'status', status })
+		const streamers = await peers.availableStreamers()
+		ws.sendEncoded({ type: 'streamers', streamers })
+		ws.sendEncoded({ type: 'settings', settings })
+	}, 0)
 	return client
 }
 
@@ -97,7 +109,7 @@ async function connect(ws, req) {
 	const gameMessage = async (msg) => {
 		switch (msg.type) {
 			case 'colonists':
-				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${JSON.stringify(msg.colonists)}`)
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${tools.debugValue(msg.colonists)}`)
 				peers.colonists(client, msg.colonists)
 				return
 
@@ -120,7 +132,7 @@ async function connect(ws, req) {
 				return
 
 			case 'state':
-				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.key} ${JSON.stringify(msg.val)}`)
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.key} ${tools.debugValue(msg.val)}`)
 				peers.setClientState(client, msg.viewer, msg.key, msg.val)
 				return
 
@@ -153,9 +165,10 @@ async function connect(ws, req) {
 	}
 
 	const clientMessage = async (msg) => {
+		// console.log(`######## ${msg.type}`)
 		switch (msg.type) {
 			case 'join':
-				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${JSON.stringify(msg.user)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${tools.debugValue(msg.user)}`)
 				peers.leave(client)
 				peers.join(client, msg.user)
 				return
@@ -166,7 +179,7 @@ async function connect(ws, req) {
 				return
 
 			case 'settings':
-				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} => ${JSON.stringify(msg.val)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} => ${tools.debugValue(msg.val)}`)
 				await storage.set(user, msg.key, msg.val)
 				if (msg.key == 'info') {
 					client.info = tools.merge(client.info, msg.val)
@@ -178,17 +191,17 @@ async function connect(ws, req) {
 				return
 
 			case 'assign':
-				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.colonistID} ${JSON.stringify(msg.viewer)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.colonistID} ${tools.debugValue(msg.viewer)}`)
 				peers.assign(client, msg.colonistID, msg.viewer)
 				return
 
 			case 'state':
-				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} ${JSON.stringify(msg.val)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.key} ${tools.debugValue(msg.val)}`)
 				peers.setGameState(client, msg.key, msg.val)
 				return
 
 			case 'job':
-				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.id} ${msg.method} ${JSON.stringify(msg.args)}`)
+				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.id} ${msg.method} ${tools.debugValue(msg.args)}`)
 				peers.runJob(client, msg.id, msg.method, msg.args)
 				return
 

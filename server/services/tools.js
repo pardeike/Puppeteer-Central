@@ -1,11 +1,7 @@
 const { encode } = require('./bson')
 
 function randomCode() {
-	return `${Math.random()
-		.toString(36)
-		.substring(2, 10)}${Math.random()
-		.toString(36)
-		.substring(2, 10)}`
+	return `${Math.random().toString(36).substring(2, 10)}${Math.random().toString(36).substring(2, 10)}`
 }
 
 function merge(current, updates) {
@@ -23,7 +19,7 @@ function merge(current, updates) {
 }
 
 function remove(arr, pred) {
-	const idx = arr.findIndex(a => pred(a))
+	const idx = arr.findIndex((a) => pred(a))
 	if (idx > -1) arr.splice(idx, 1)
 }
 
@@ -31,9 +27,16 @@ function errorMessage(msg) {
 	return encode({ type: 'error', message: msg })
 }
 
+const debugValue = (obj) => {
+	if (Array.isArray(obj)) return `[${obj.map((e) => debugValue(e)).join(',')}]`
+	if (typeof obj == 'string') return obj
+	return `{${Object.keys(obj).join(',')}}`
+}
+
 module.exports = {
 	randomCode,
 	merge,
 	remove,
-	errorMessage
+	errorMessage,
+	debugValue,
 }

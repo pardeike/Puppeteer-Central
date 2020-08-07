@@ -1,5 +1,6 @@
 import React from 'react'
 import { Segment, Tab, Menu } from 'semantic-ui-react'
+import { Spacer } from '../comps/tools'
 import { useStateLink } from '@hookstate/core'
 import ColonistBasicCommands from './ux/colonist-basic-commands'
 import ColonistCapacities from './ux/colonist-capacities'
@@ -14,11 +15,19 @@ import GameHeader from './ux/game-header'
 import colonist from '../services/cmd_colonist'
 import ColonistInjuries from './ux/colonist-injuries'
 import game from '../services/cmd_game-info'
+import settings from '../services/cmd_settings'
+import streamers from '../services/cmd_streamers'
 
 export default function Game() {
+	const colonistLink = useStateLink(colonist.ref)
 	const colonistFlagsLink = useStateLink(colonist.flagsRef)
 	const isAvailableLink = useStateLink(colonist.isAvailableRef)
 	const gameLink = useStateLink(game.ref)
+	const settingsLink = useStateLink(settings.ref)
+	const streamersLink = useStateLink(streamers.ref)
+
+	const viewing = settingsLink.value.viewing
+	const streamer = viewing ? streamersLink.value.find((s) => s.user.id == viewing.id && s.user.service == viewing.service) : undefined
 
 	const menu = (name, enabled, content) => ({
 		menuItem: (
@@ -46,20 +55,29 @@ export default function Game() {
 		menu('schedule', true, <ColonistSchedules />),
 		// optional twitch toolkit position
 	]
-	if (gameLink.value.features.indexOf('twitch-toolkit') > -1) panes.push(menu('toolkit', true, <TwitchToolkit />))
+
+	let toolkit = undefined
+	if (gameLink.value.features.indexOf('twitch-toolkit') > -1) {
+		if (colonistLink.value.name) toolkit = <TwitchToolkit />
+		panes.push(menu('toolkit', true, <TwitchToolkit />))
+	}
 
 	return (
 		<React.Fragment>
-			<GameHeader />
-			<ColonistOverview />
-			{colonistFlagsLink.value.assigned && isAvailableLink.value ? (
-				<Segment.Group>
-					<Segment>
-						<Tab panes={panes} />
-					</Segment>
-				</Segment.Group>
-			) : undefined}
-			<div style={{ height: 10 }} />
+			<GameHeader streamer={streamer} />
+			{streamer && (
+				<React.Fragment>
+					<ColonistOverview />
+					{colonistLink.value.name && ((colonistFlagsLink.value.assigned && isAvailableLink.value) || toolkit) && (
+						<React.Fragment>
+							<Segment.Group>
+								<Segment>{colonistFlagsLink.value.assigned && isAvailableLink.value ? <Tab panes={panes} /> : toolkit}</Segment>
+							</Segment.Group>
+							<Spacer />
+						</React.Fragment>
+					)}
+				</React.Fragment>
+			)}
 		</React.Fragment>
 	)
 }

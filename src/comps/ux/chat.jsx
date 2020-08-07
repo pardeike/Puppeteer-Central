@@ -38,7 +38,7 @@ export default function Chat() {
 						compact>
 						<b>{msg.message}</b>
 						{msg.message && <br />}
-						<span style={{ textTransform: 'capitalize', userSelect: 'text' }}>{msg.result}</span>
+						<span style={{ userSelect: 'text' }}>{msg.result.replace(/^\w/, (c) => c.toUpperCase())}</span>
 					</Message>
 				))}
 		</React.Fragment>

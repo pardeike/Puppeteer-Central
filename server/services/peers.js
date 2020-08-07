@@ -5,7 +5,7 @@ const { encode } = require('./bson')
 const peersDebugging = false
 
 const methodError = (method, err) => {
-	console.log(`### ${method} error: ${err}`)
+	console.log(`!!!! ${method.toUpperCase()} ERROR: ${err}`)
 }
 
 /*
@@ -35,23 +35,23 @@ const methodError = (method, err) => {
 
 const clients = []
 
-const _debug = (c, i, indent, currentClient) => {
-	const s0 = '      '.repeat(indent - 1)
-	const s1 = '      '.repeat(indent)
-	console.log(`${s0}--> ${i}: ${c.user.name}:${c.user.service}:${c.user.id} ${c == currentClient ? 'CURRENT' : ''}`)
-	console.log(`${s1} |- info=${JSON.stringify(c.info)}`)
-	console.log(`${s1} |- srvr=${c.server != undefined}`)
-	console.log(`${s1} |- game=${c.game.connected} [${c.game.colonists.length}]`)
-	console.log(`${s1} |- sockets=${c.sockets.length}`)
-	console.log(`${s1} |- stalled=${c.stalled ? 'yes' : 'no'}`)
-	console.log(`${s1} +- ${c.viewers.length} viewer(s)`)
-	c.viewers.forEach((v, j) => _debug(v, j, indent + 1, currentClient))
-}
-
-const debugClients = (currentClient) => {
+const debugClients = (context, currentClient) => {
 	if (!peersDebugging) return
-	console.log(`TOTAL ${clients.length} CLIENTS:`)
-	clients.forEach((c, i) => _debug(c, i, 1, currentClient))
+	console.log('')
+	console.log(`${context}, ${clients.length} clients total:`)
+	clients.forEach((c, i) => {
+		console.log(`${i}: ${c.user.name}:${c.user.service}:${c.user.id} ${c == currentClient ? 'CURRENT' : ''}`)
+		console.log(`   |- info=${tools.debugValue(c.info)}`)
+		console.log(`   |- srvr=${c.server != undefined}`)
+		console.log(`   |- game=${c.game.connected} [${c.game.colonists.length}]`)
+		console.log(`   |- sockets=#${c.sockets.length}`)
+		console.log(`   |- stalled=${c.stalled ? 'yes' : 'no'}`)
+		console.log(`   +- viewers=[${c.viewers.map((v) => (v ? v.user.id : 'NULL')).join(',')}]`)
+		c.viewers.forEach((v, j) => {
+			console.log(`      ${j}: ${v ? v.user.name + ':' + v.user.service + ':' + v.user.id : 'NULL'} ${v == currentClient ? 'CURRENT' : ''}`)
+			console.log(`         +- ${v.viewers.length} viewer(s)`)
+		})
+	})
 }
 
 const sameUser = (u1, u2) => u1.service == u2.service && u1.id == u2.id
@@ -81,7 +81,7 @@ const publicClient = (c) => ({
 })
 
 const safeClientSend = (client, msg, skipable) => {
-	if (msg.type != 'earn' && msg.type != 'colonist-basics') debugClients(client)
+	// if (msg.type != 'earn' && msg.type != 'colonist-basics') debugClients(`Sending client message ${msg.type}`, client)
 	let n = 1
 	const user = client.user
 	const wasStalled = user ? user.stalled : false
@@ -93,10 +93,10 @@ const safeClientSend = (client, msg, skipable) => {
 					const state = user.stalled ? 'stalled' : 'stopped stalling'
 					console.log(`Socket ${n} for ${user.name}:${user.service} ${state}`)
 					var streamer = findClient(user)
-					if (streamer && streamer.server) safeSend({ type: 'stalling', viewer: publicUser(user), state: user.stalled })(streamer.server)
+					if (streamer && streamer.server) safeServerSend({ type: 'stalling', viewer: publicUser(user), state: user.stalled })(streamer.server)
 				}
 			} else {
-				if (!user) console.log('safeClientSend called with undefined usser')
+				if (!user) console.log('safeClientSend called with undefined user')
 				if (!s) console.log('safeClientSend called with undefined socket')
 			}
 			if (!skipable || s.bufferedAmount == 0) s.send(encode(msg))
@@ -107,27 +107,28 @@ const safeClientSend = (client, msg, skipable) => {
 	})
 }
 
-const safeSend = (msg, skipable) => (s) => {
+const safeServerSend = (msg, skipable) => (s) => {
+	// debugClients(`Sending server message ${msg.type}`, undefined)
 	if (!s) {
-		console.log('SafeSend called with undefined socket')
+		console.log('safeServerSend called with undefined socket')
 		return
 	}
 	if (peersDebugging) console.log(`SENDING ${msg.type} FROM ${msg.viewer.name}:${msg.viewer.service}:${msg.viewer.id}`)
 	try {
 		if (!skipable || s.bufferedAmount == 0) s.send(encode(msg))
 	} catch (err) {
-		if (`${err}`.indexOf('(CLOSED)') == -1) methodError('safeSend', err)
+		if (`${err}`.indexOf('(CLOSED)') == -1) methodError('safeServerSend', err)
 	}
 }
 
 function addClient(type, user, info) {
 	try {
 		var client = findClient(user)
-		console.log(`### ${type} ${client ? 'MERGED' : 'ADDED'}: user=${JSON.stringify(user)}`)
+		console.log(`### ${type} ${client ? 'MERGED' : 'ADDED'}: user=${tools.debugValue(user)}`)
 		if (client) {
 			client.user = user // refresh picture for example
 			client.sockets.push(info.ws)
-			debugClients(client)
+			debugClients('Adding existing client', client)
 			return client
 		}
 		client = {
@@ -148,7 +149,7 @@ function addClient(type, user, info) {
 			stalled: false,
 		}
 		clients.push(client)
-		debugClients(client)
+		debugClients('Adding new client', client)
 		return client
 	} catch (err) {
 		methodError('addClient', err)
@@ -163,7 +164,8 @@ function addGame(client, ws) {
 		streamerChange(client)
 		const msg = { type: 'game', event: 'connect' }
 		safeClientSend(client, msg)
-		client.viewers.forEach((c) => c.sockets.filter((s) => client.sockets.indexOf(s) == -1).forEach(safeSend(msg)))
+		const serverSend = safeServerSend(msg)
+		client.viewers.forEach((c) => c.sockets.filter((s) => client.sockets.indexOf(s) == -1).forEach(serverSend))
 	} catch (err) {
 		methodError('addGame', err)
 	}
@@ -175,7 +177,7 @@ function removeClient(ws) {
 		if (!client) return
 		leave(client)
 		tools.remove(client.sockets, (s) => s == ws)
-		debugClients(client)
+		debugClients('Removing client', client)
 	} catch (err) {
 		methodError('removeClient', err)
 	}
@@ -187,7 +189,8 @@ function removeGame(ws) {
 		if (!client) return
 		const msg = { type: 'game', event: 'disconnect' }
 		safeClientSend(client, msg)
-		client.viewers.forEach((c) => c.sockets.filter((s) => client.sockets.indexOf(s) == -1).forEach(safeSend(msg)))
+		const serverSend = safeServerSend(msg)
+		client.viewers.forEach((c) => c.sockets.filter((s) => client.sockets.indexOf(s) == -1).forEach(serverSend))
 		client.viewers = []
 		client.server = undefined
 		client.game.connected = false
@@ -219,7 +222,7 @@ function getViewers(user, search) {
 function assign(client, colonistID, viewer) {
 	try {
 		if (!serverAvailable(client)) return
-		safeSend({ type: 'assign', colonistID, viewer })(client.server)
+		safeServerSend({ type: 'assign', colonistID, viewer })(client.server)
 	} catch (err) {
 		methodError('assign', err)
 	}
@@ -227,7 +230,7 @@ function assign(client, colonistID, viewer) {
 
 function disconnectViewers(client) {
 	try {
-		if (serverAvailable(client)) client.viewers.forEach((c) => safeSend({ type: 'leave', viewer: publicUser(c.user) })(client.server))
+		if (serverAvailable(client)) client.viewers.forEach((c) => safeServerSend({ type: 'leave', viewer: publicUser(c.user) })(client.server))
 		client.viewers = []
 	} catch (err) {
 		methodError('disconnectViewers', err)
@@ -240,14 +243,14 @@ function join(client, user) {
 		if (!streamer) return
 		if (!serverAvailable(streamer)) return
 		if (streamer.viewers.indexOf(client) != -1) {
-			safeSend({ type: 'join', viewer: publicUser(client.user) })(streamer.server)
+			safeServerSend({ type: 'join', viewer: publicUser(client.user) })(streamer.server)
 			return
 		}
 		if (!serverAvailable(streamer)) return
 		streamer.viewers.push(client)
-		debugClients(client)
+		debugClients('Join', client)
 		streamerChange(streamer)
-		safeSend({ type: 'join', viewer: publicUser(client.user) })(streamer.server)
+		safeServerSend({ type: 'join', viewer: publicUser(client.user) })(streamer.server)
 	} catch (err) {
 		methodError('join', err)
 	}
@@ -261,10 +264,10 @@ function leave(client) {
 				tools.remove(streamer.viewers, (c) => c == client)
 				if (serverAvailable(streamer)) {
 					streamerChange(streamer)
-					safeSend({ type: 'leave', viewer: publicUser(client.user) })(streamer.server)
+					safeServerSend({ type: 'leave', viewer: publicUser(client.user) })(streamer.server)
 				}
 			})
-		debugClients(client)
+		debugClients('Leave', client)
 	} catch (err) {
 		methodError('leave', err)
 	}
@@ -347,7 +350,7 @@ function setGameState(client, key, val) {
 		clients
 			.filter((c) => c.viewers.indexOf(client) != -1)
 			.forEach((streamer) => {
-				if (streamer.server) safeSend({ type: 'state', user: userId(client.user), key, val })(streamer.server)
+				if (streamer.server) safeServerSend({ type: 'state', user: userId(client.user), key, val })(streamer.server)
 			})
 	} catch (err) {
 		methodError('setGameState', err)
@@ -359,7 +362,7 @@ function runJob(client, id, method, args) {
 		clients
 			.filter((c) => c.viewers.indexOf(client) != -1)
 			.forEach((streamer) => {
-				if (streamer.server) safeSend({ type: 'job', user: userId(client.user), id, method, args })(streamer.server)
+				if (streamer.server) safeServerSend({ type: 'job', user: userId(client.user), id, method, args })(streamer.server)
 			})
 	} catch (err) {
 		methodError('runJob', err)
@@ -368,11 +371,11 @@ function runJob(client, id, method, args) {
 
 function incomingChat(client, message) {
 	try {
-		debugClients(client)
+		debugClients('Chat', client)
 		clients
 			.filter((c) => c.viewers.indexOf(client) != -1)
 			.forEach((streamer) => {
-				if (streamer.server) safeSend({ type: 'chat', viewer: userId(client.user), message })(streamer.server)
+				if (streamer.server) safeServerSend({ type: 'chat', viewer: userId(client.user), message })(streamer.server)
 			})
 	} catch (err) {
 		methodError('incomingChat', err)

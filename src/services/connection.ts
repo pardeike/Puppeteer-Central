@@ -16,8 +16,9 @@ import stream from './cmd_stream'
 import streamers from './cmd_streamers'
 import timeinfo from './cmd_time-info'
 import { BSON } from 'bsonfy'
+import { debugValue } from '../comps/tools'
 
-const debug = true
+const debug = false
 
 const connect = () => {
 	const host = document.location.host
@@ -66,8 +67,12 @@ const connect = () => {
 	ws.onmessage = (e) => {
 		var bytes = new Uint8Array(e.data)
 		const msg = BSON.deserialize(bytes)
-		//if (debug && 'portrait,earn,colonist-basics'.indexOf(msg['type']) == -1)
-		//	console.log(`--> ${msg['type'].toUpperCase()} ${Object.keys(msg).join(' ')}`)
+
+		// debug
+		if (debug && 'portrait,earn,colonist-basics'.indexOf(msg['type']) == -1) {
+			console.log(`=> ${msg['type'].toUpperCase()} ${debugValue(msg)}`)
+		}
+
 		assignment.msg(msg)
 		chat.msg(msg)
 		colonist.msg(msg)
