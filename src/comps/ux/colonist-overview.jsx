@@ -119,13 +119,15 @@ export default function ColonistOverview() {
 					<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 						<div style={colonistPortrait}>
 							{colonistLink.value.drafted && <img src="/i/drafted.png" style={draft} />}
-							<Popup
-								content={<CustomizeColonist />}
-								size="mini"
-								on="click"
-								flowing
-								trigger={<img src="/i/customize.png" style={customize} position="bottom left" />}
-							/>
+							{isAvailableLink.value && (
+								<Popup
+									content={<CustomizeColonist />}
+									size="mini"
+									on="click"
+									flowing
+									trigger={<img src="/i/customize.png" style={customize} position="bottom left" />}
+								/>
+							)}
 							<img src={portraitLink.value} style={colonistImage} />
 						</div>
 						<div>
