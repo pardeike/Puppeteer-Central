@@ -31,7 +31,7 @@ export default function Stepper(props) {
 	return (
 		<div style={grid}>
 			<Button style={miniButton} compact icon={<Icon name="caret left" onClick={() => changeValue(-1)} />} />
-			<div style={{ textAlign: 'center', marginTop: 'auto', marginBottom: 'auto' }}>{value}</div>
+			<div style={{ textAlign: 'center', overflow: 'hidden', marginTop: 'auto', marginBottom: 'auto' }}>{value}</div>
 			<Button style={miniButton} compact icon={<Icon name="caret right" onClick={() => changeValue(1)} />} />
 		</div>
 	)
