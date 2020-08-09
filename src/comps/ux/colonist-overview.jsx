@@ -1,5 +1,5 @@
 import React, { useEffect, createRef } from 'react'
-import { Segment, Dropdown, Image } from 'semantic-ui-react'
+import { Popup, Segment, Dropdown } from 'semantic-ui-react'
 import { percentageBar, colorBar } from './bars'
 import { useStateLink } from '@hookstate/core'
 import NoAssignment from '../ux/no-assignment'
@@ -10,6 +10,7 @@ import state from '../../services/cmd_state'
 import timeInfo from '../../services/cmd_time-info'
 import commands from '../../commands'
 import createDOMPurify from 'dompurify'
+import CustomizeColonist from './customize-colonist'
 
 const speedTags = [
 	<span style={{ color: 'blue' }}>Paused</span>,
@@ -63,6 +64,14 @@ export default function ColonistOverview() {
 		height: 16,
 	}
 
+	const customize = {
+		position: 'absolute',
+		bottom: 2,
+		right: 2,
+		width: 16,
+		height: 16,
+	}
+
 	const getZoneOptions = () => {
 		const choices = stateLink.value.zones.map((z) => ({
 			key: z,
@@ -110,6 +119,13 @@ export default function ColonistOverview() {
 					<div style={{ display: 'flex', flexWrap: 'wrap' }}>
 						<div style={colonistPortrait}>
 							{colonistLink.value.drafted && <img src="/i/drafted.png" style={draft} />}
+							<Popup
+								content={<CustomizeColonist />}
+								size="mini"
+								on="click"
+								flowing
+								trigger={<img src="/i/customize.png" style={customize} position="bottom left" />}
+							/>
 							<img src={portraitLink.value} style={colonistImage} />
 						</div>
 						<div>

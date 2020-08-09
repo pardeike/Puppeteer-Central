@@ -3,6 +3,7 @@ import colonist from './services/cmd_colonist'
 import portrait from './services/cmd_portrait'
 import settings from './services/cmd_settings'
 import stream from './services/cmd_stream'
+import game from './services/cmd_game-info'
 import tools from './tools'
 
 const joinGame = (user) => {
@@ -75,6 +76,10 @@ const gizmo = (id) => {
 	stream.state('gizmo', id)
 }
 
+const customize = (key, val) => {
+	game.customize(key, val)
+}
+
 export default {
 	joinGame,
 	leaveGame,
@@ -89,4 +94,5 @@ export default {
 	action,
 	gizmos,
 	gizmo,
+	customize,
 }

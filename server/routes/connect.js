@@ -3,7 +3,7 @@ const storage = require('../services/storage')
 const tools = require('../services/tools')
 const { encode, parse } = require('../services/bson')
 
-const minimumModVersion = '0.2.0.0'
+const minimumModVersion = '1.3.0.0'
 
 // https://blog.stephencleary.com/2009/04/tcpip-net-sockets-faq.html
 
@@ -208,6 +208,11 @@ async function connect(ws, req) {
 			case 'chat':
 				if (debugCommonCommands) console.log(`#${n} [client] ${msg.type} ${msg.message}`)
 				peers.incomingChat(client, msg.message)
+				return
+
+			case 'customize':
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.key} ${msg.val}`)
+				peers.customize(client, msg.key, msg.val)
 				return
 		}
 		console.log(`#${n} [client] unknown message '${msg.type}'`)

@@ -77,3 +77,6 @@ element {
 .restrictions div {
 	height: 100%;
 }
+.semantic_ui_range_inner {
+	margin-left: 0 !important;
+}

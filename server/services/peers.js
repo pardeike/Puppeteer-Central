@@ -382,6 +382,19 @@ function incomingChat(client, message) {
 	}
 }
 
+function customize(client, key, val) {
+	try {
+		debugClients('Customize', client)
+		clients
+			.filter((c) => c.viewers.indexOf(client) != -1)
+			.forEach((streamer) => {
+				if (streamer.server) safeServerSend({ type: 'customize', viewer: userId(client.user), key, val })(streamer.server)
+			})
+	} catch (err) {
+		methodError('customize', err)
+	}
+}
+
 function returnJobResult(client, viewer, id, info) {
 	try {
 		const json = { type: 'job', id, info: JSON.parse(info) }
@@ -448,6 +461,7 @@ module.exports = {
 	setGameState,
 	runJob,
 	incomingChat,
+	customize,
 	returnJobResult,
 	grid,
 	menu,
