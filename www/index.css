@@ -30,6 +30,12 @@
 .ui.menu {
 	min-height: unset !important;
 }
+.ui.search .prompt {
+	border-radius: 0 !important;
+}
+.ui.search .ui.icon {
+	width: 100%;
+}
 .ui.secondary.vertical.menu > .item {
 	width: 100% !important;
 	padding: 0 !important;

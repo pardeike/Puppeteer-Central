@@ -16,6 +16,7 @@ const initialValue = {
 		melanin: 0,
 		hairColor: [0, 0, 0],
 	},
+	tt_commands: [],
 }
 const ref = createStateLink(initialValue)
 
@@ -26,6 +27,9 @@ const link = (_ws) => {
 const msg = (msg) => {
 	if (msg.type == 'game-info') {
 		ref.access().set(msg.info)
+	}
+	if (msg.type == 'toolkit-commands') {
+		ref.access().nested.tt_commands.set(msg.commands)
 	}
 }
 

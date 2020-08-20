@@ -440,6 +440,15 @@ function outgoingChat(client, viewer, message) {
 	}
 }
 
+function toolkitCommands(client, viewer, commands) {
+	try {
+		const json = { type: 'toolkit-commands', commands }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => safeClientSend(c, json, true))
+	} catch (err) {
+		methodError('toolkitCommands', err)
+	}
+}
+
 module.exports = {
 	addClient,
 	addGame,
@@ -467,4 +476,5 @@ module.exports = {
 	menu,
 	selection,
 	outgoingChat,
+	toolkitCommands,
 }
