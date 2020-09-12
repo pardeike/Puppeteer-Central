@@ -36,7 +36,7 @@
 		"lodash": "4.17.19",
 		"memory-cache": "0.2.0",
 		"mongodb": "3.6.0",
-		"node-fetch": "2.6.0",
+		"node-fetch": "2.6.1",
 		"nodemon-webpack-plugin": "4.3.2",
 		"passport": "0.4.1",
 		"passport-youtube-v3": "2.1.0",
