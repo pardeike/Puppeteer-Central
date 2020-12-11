@@ -65,8 +65,19 @@ div.menu {
 	padding: 8px !important;
 	font-size: 1em;
 }
+.ui.tabular {
+	flex-flow: row wrap;
+	border-bottom: none !important;
+}
 .ui.tabular.menu .item {
 	padding: 8px;
+	border: 0;
+	border-radius: 4px !important;
+}
+.ui.tabular.menu .active.item {
+	background-color: #ddd;
+	border: 0;
+	border-radius: 4px !important;
 }
 element {
 	max-height: 400px;

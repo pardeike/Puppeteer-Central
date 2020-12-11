@@ -36,7 +36,7 @@ export default function Game() {
 				<img src={`/i/tabs/${name}.png`} style={{ width: 24, height: 24, opacity: enabled ? 1 : 0.25 }} />
 			</Menu.Item>
 		),
-		render: () => (enabled ? content : undefined),
+		render: () => (enabled ? <div style={{ marginTop: '12px', borderTop: '1px solid lightgray' }}>{content}</div> : undefined),
 	})
 
 	let panes = [

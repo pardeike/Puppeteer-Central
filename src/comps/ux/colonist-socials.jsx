@@ -9,22 +9,22 @@ export default function ColonistThoughts() {
 	const grid = {
 		paddingTop: '14px',
 		display: 'grid',
-		gridRowGap: '4px',
-		gridColumnGap: '10px',
-		gridTemplateColumns: 'auto auto auto auto auto',
-		fontSize: '0.8em',
+		gridRowGap: '0',
+		gridColumnGap: '4px',
+		gridTemplateColumns: 'repeat(6, auto)',
+		fontSize: 'calc(min(2.5vw, 1.1em))',
+		alignItems: 'center'
 	}
 
-	const tag = (rel) => {
-		if (rel.ourOpinion == '') return (<span></span>)
+	const tag = (opinions, ourOpinion) => {
 		return (
 			<Popup
 				offset={-8}
-				content={<span>{rel.opinions.map((opinion, i) => (
+				content={<span><div><b>Our opinion</b></div>{opinions.map((opinion, i) => (
 					<div key={i}>{opinion.reason} {opinion.value}</div>
 					))}</span>}
 				size="mini"
-				trigger={<div style={colored(rel.ourOpinion)}>{rel.ourOpinion}</div>}
+				trigger={<span>{ourOpinion != '0' ? ourOpinion : ''}</span>}
 			/>
 		)
 	}
@@ -41,25 +41,33 @@ export default function ColonistThoughts() {
 		return style
 	}
 
+	const colonistImage = {
+		width: '3em',
+		height: '3em',
+		margin: 0,
+		padding: 0
+	}
+
 	return (
 		<React.Fragment>
 			<div style={grid}>
-				<div><b>Type</b></div>
-				<div><b>Name</b></div>
-				<div style={{ textAlign: "center" }}><b>Ours</b></div>
-				<div style={{ textAlign: "center" }}><b>Theirs</b></div>
-				<div><b>Situation</b></div>
-				{socialsLink.nested.relations.value.map((relation) => (
-					<React.Fragment key={relation.pawn}>
-						<div>{relation.type}</div>
+				{socialsLink.nested.relations.value.map((relation, i) => (
+					<React.Fragment key={i}>
+						<img src={relation.portraitURL} style={colonistImage} />
+						<div>{relation.type.replace('Acquaintance', 'Fellow')}</div>
 						<div>{relation.pawn}</div>
-						{tag(relation)}
-						<div style={colored(relation.theirOpinion)}>{relation.theirOpinion}</div>
-						<div>{relation.situation}</div>
+						<div style={colored(relation.ourOpinion)}>{relation.ourOpinion == '' ? <span/> : tag(relation.opinions, relation.ourOpinion)}</div>
+						<div style={colored(relation.theirOpinion)}>{relation.ourOpinion == '' ? <span/> : <Popup
+							offset={-8}
+							content={<b>Their opinion</b>}
+							size="mini"
+							trigger={<span>{relation.theirOpinion != '0' ? relation.theirOpinion : ''}</span>}
+						/>}</div>
+						<div style={{ textAlign: 'right' }}>{relation.situation}</div>
 					</React.Fragment>
 				))}
 			</div>
-			<div class="ui divider"></div>
+			<div className={'ui divider'}	></div>
 			<div><b>Last interaction: </b>{socialsLink.nested.lastInteraction.value}</div>
 		</React.Fragment>
 	)
