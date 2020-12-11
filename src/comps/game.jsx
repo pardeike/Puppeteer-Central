@@ -10,6 +10,7 @@ import ColonistOverview from './ux/colonist-overview'
 import ColonistSchedules from './ux/colonist-schedules'
 import ColonistSkills from './ux/colonist-skills'
 import ColonistThoughts from './ux/colonist-thoughts'
+import ColonistSocials from './ux/colonist-socials'
 import TwitchToolkit from './ux/colonist-toolkit'
 import GameHeader from './ux/game-header'
 import colonist from '../services/cmd_colonist'
@@ -51,6 +52,7 @@ export default function Game() {
 		),
 		menu('mood', true, <ColonistMood />),
 		menu('mind', colonistFlagsLink.value.thoughts, <ColonistThoughts />),
+		menu('social', true, <ColonistSocials />),
 		menu('skill', colonistFlagsLink.value.skills, <ColonistSkills />),
 		menu('schedule', true, <ColonistSchedules />),
 		// optional twitch toolkit position

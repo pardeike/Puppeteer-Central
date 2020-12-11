@@ -1,7 +1,8 @@
 const app = require('express')()
 
 const helmet = require('helmet')
-app.use(helmet())
+helmet.featurePolicy
+app.use(helmet({ contentSecurityPolicy: false }))
 
 var cookieParser = require('cookie-parser')
 app.use(cookieParser())

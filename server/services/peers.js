@@ -345,6 +345,15 @@ function setClientState(client, viewer, key, val) {
 	}
 }
 
+function socials(client, viewer, info) {
+	try {
+		const json = { type: 'socials', info: info }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => safeClientSend(c, json))
+	} catch (err) {
+		methodError('socials', err)
+	}
+}
+
 function setGameState(client, key, val) {
 	try {
 		clients
@@ -467,6 +476,7 @@ module.exports = {
 	availableStreamers,
 	streamerChange,
 	setClientState,
+	socials,
 	setGameState,
 	runJob,
 	incomingChat,
