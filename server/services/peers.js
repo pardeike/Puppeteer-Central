@@ -363,6 +363,15 @@ function gear(client, viewer, info) {
 	}
 }
 
+function inventory(client, viewer, info) {
+	try {
+		const json = { type: 'inventory', info: info }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => safeClientSend(c, json))
+	} catch (err) {
+		methodError('inventory', err)
+	}
+}
+
 function setGameState(client, key, val) {
 	try {
 		clients
@@ -487,6 +496,7 @@ module.exports = {
 	setClientState,
 	socials,
 	gear,
+	inventory,
 	setGameState,
 	runJob,
 	incomingChat,

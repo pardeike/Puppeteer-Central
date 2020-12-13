@@ -7,10 +7,10 @@ export default function ColonistThoughts() {
 	const socialsLink = useStateLink(socials.ref)
 
 	const grid = {
-		paddingTop: '14px',
+		paddingTop: 14,
 		display: 'grid',
-		gridRowGap: '0',
-		gridColumnGap: '4px',
+		gridRowGap: 0,
+		gridColumnGap: 4,
 		gridTemplateColumns: 'repeat(6, auto)',
 		fontSize: 'calc(min(2.5vw, 1.1em))',
 		alignItems: 'center'
@@ -43,9 +43,7 @@ export default function ColonistThoughts() {
 
 	const colonistImage = {
 		width: '3em',
-		height: '3em',
-		margin: 0,
-		padding: 0
+		height: '3em'
 	}
 
 	return (

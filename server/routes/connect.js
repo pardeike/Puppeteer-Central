@@ -146,6 +146,11 @@ async function connect(ws, req) {
 				peers.gear(client, msg.viewer, msg.info)
 				return
 
+			case 'inventory':
+				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.info}`)
+				peers.inventory(client, msg.viewer, msg.info)
+				return
+
 			case 'job':
 				if (debugCommonCommands) console.log(`#${n} [game] ${msg.type} ${msg.id} ${msg.info}`)
 				peers.returnJobResult(client, msg.viewer, msg.id, msg.info)

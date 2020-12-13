@@ -80,6 +80,14 @@ const customize = (key, val) => {
 	game.customize(key, val)
 }
 
+const drop = (id) => {
+	stream.state('drop', id)
+}
+
+const consume = (id) => {
+	stream.state('consume', id)
+}
+
 export default {
 	joinGame,
 	leaveGame,
@@ -95,4 +103,6 @@ export default {
 	gizmos,
 	gizmo,
 	customize,
+	drop,
+	consume
 }

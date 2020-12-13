@@ -5,6 +5,7 @@ import earn from './cmd_earn'
 import gameinfo from './cmd_game-info'
 import gear from './cmd_gear'
 import grid from './cmd_grid'
+import inventory from './cmd_inventory'
 import jobs from './cmd_jobs'
 import menu from './cmd_menu'
 import ping from './cmd_ping'
@@ -35,6 +36,7 @@ const connect = () => {
 		gameinfo.link(ws)
 		gear.link(ws)
 		grid.link(ws)
+		inventory.link(ws)
 		jobs.link(ws)
 		menu.link(ws)
 		ping.link(ws)
@@ -56,6 +58,7 @@ const connect = () => {
 		gameinfo.remove(e)
 		gear.remove(e)
 		grid.remove(e)
+		inventory.remove(e)
 		jobs.remove(e)
 		menu.remove(e)
 		ping.remove(e)
@@ -86,6 +89,7 @@ const connect = () => {
 		gameinfo.msg(msg)
 		gear.msg(msg)
 		grid.msg(msg)
+		inventory.msg(msg)
 		jobs.msg(msg)
 		menu.msg(msg)
 		ping.msg(msg)

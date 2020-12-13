@@ -12,6 +12,7 @@ import ColonistSkills from './ux/colonist-skills'
 import ColonistThoughts from './ux/colonist-thoughts'
 import ColonistSocials from './ux/colonist-socials'
 import ColonistGear from './ux/colonist-gear'
+import ColonistInventory from './ux/colonist-inventory'
 import TwitchToolkit from './ux/colonist-toolkit'
 import GameHeader from './ux/game-header'
 import colonist from '../services/cmd_colonist'
@@ -44,6 +45,7 @@ export default function Game() {
 		menu('state', true, <ColonistBasicCommands />),
 		menu('combat', true, <ColonistCombat />),
 		menu('gear', true, <ColonistGear />),
+		menu('inventory', true, <ColonistInventory />),
 		menu(
 			'injury',
 			colonistFlagsLink.value.injuries || colonistFlagsLink.value.capacities,

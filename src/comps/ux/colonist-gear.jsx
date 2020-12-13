@@ -1,8 +1,10 @@
 import React from 'react'
+import { Button } from 'semantic-ui-react'
 import { useMediaQuery } from 'react-responsive'
 import { useStateLink } from '@hookstate/core'
 import { Popup } from 'semantic-ui-react'
 import gear from '../../services/cmd_gear'
+import commands from '../../commands'
 
 export default function ColonistThoughts() {
 	const gearLink = useStateLink(gear.ref)
@@ -66,6 +68,19 @@ export default function ColonistThoughts() {
 		lineHeight: 0
 	}
 
+	const dropArrow = {
+		position: 'absolute',
+		padding: 0,
+		width: 20,
+		height: 20,
+		right: 0,
+		top: -23
+	}
+
+	const drop = (id) => () => {
+		commands.drop(id)
+	}
+
 	const qCategories = ['Awful', 'Poor', 'Normal', 'Good', 'Excellent', 'Masterwork', 'Legendary']
 	const stars = (n) => (
 		<div style={star}>
@@ -82,7 +97,12 @@ export default function ColonistThoughts() {
 					{apparel.forced ? <img src="/i/forced.png" width="8" height="10" /> : undefined}
 				</div>
 				{stars(apparel.quality)}
-				<div style={info}>{apparel.name}</div>
+				<div style={info}>
+					<Button style={dropArrow} icon onClick={drop(apparel.id)}>
+						<img src="/i/drop.png" style={{ width: '75%', height: '75%' }} />
+					</Button>
+					{apparel.name}
+				</div>
 			</div>
 		</div>
 	)
