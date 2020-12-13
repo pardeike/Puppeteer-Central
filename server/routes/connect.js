@@ -3,7 +3,7 @@ const storage = require('../services/storage')
 const tools = require('../services/tools')
 const { encode, parse } = require('../services/bson')
 
-const minimumModVersion = '1.4.3.0'
+const minimumModVersion = '1.5.0.0'
 
 // https://blog.stephencleary.com/2009/04/tcpip-net-sockets-faq.html
 
