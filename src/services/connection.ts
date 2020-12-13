@@ -3,6 +3,7 @@ import chat from './cmd_chat'
 import colonist from './cmd_colonist'
 import earn from './cmd_earn'
 import gameinfo from './cmd_game-info'
+import gear from './cmd_gear'
 import grid from './cmd_grid'
 import jobs from './cmd_jobs'
 import menu from './cmd_menu'
@@ -10,12 +11,12 @@ import ping from './cmd_ping'
 import portrait from './cmd_portrait'
 import selection from './cmd_selection'
 import settings from './cmd_settings'
+import socials from './cmd_socials'
 import state from './cmd_state'
 import status from './cmd_status'
 import stream from './cmd_stream'
 import streamers from './cmd_streamers'
 import timeinfo from './cmd_time-info'
-import socials from './cmd_socials'
 import { BSON } from 'bsonfy'
 import { debugValue } from '../comps/tools'
 
@@ -32,6 +33,7 @@ const connect = () => {
 		colonist.link(ws)
 		earn.link(ws)
 		gameinfo.link(ws)
+		gear.link(ws)
 		grid.link(ws)
 		jobs.link(ws)
 		menu.link(ws)
@@ -39,12 +41,12 @@ const connect = () => {
 		portrait.link(ws)
 		selection.link(ws)
 		settings.link(ws)
+		socials.link(ws)
 		state.link(ws)
 		status.link(ws)
 		stream.link(ws)
 		streamers.link(ws)
 		timeinfo.link(ws)
-		socials.link(ws)
 	}
 	ws.onclose = (e) => {
 		assignment.remove(e)
@@ -52,6 +54,7 @@ const connect = () => {
 		colonist.remove(e)
 		earn.remove(e)
 		gameinfo.remove(e)
+		gear.remove(e)
 		grid.remove(e)
 		jobs.remove(e)
 		menu.remove(e)
@@ -59,12 +62,12 @@ const connect = () => {
 		portrait.remove(e)
 		selection.remove(e)
 		settings.remove(e)
+		socials.remove(e)
 		state.remove(e)
 		status.remove(e)
 		stream.remove(e)
 		streamers.remove(e)
 		timeinfo.remove(e)
-		socials.remove(e)
 		setTimeout(connect, 1000)
 	}
 	ws.onmessage = (e) => {
@@ -81,6 +84,7 @@ const connect = () => {
 		colonist.msg(msg)
 		earn.msg(msg)
 		gameinfo.msg(msg)
+		gear.msg(msg)
 		grid.msg(msg)
 		jobs.msg(msg)
 		menu.msg(msg)
@@ -88,12 +92,12 @@ const connect = () => {
 		portrait.msg(msg)
 		selection.msg(msg)
 		settings.msg(msg)
+		socials.msg(msg)
 		state.msg(msg)
 		status.msg(msg)
 		stream.msg(msg)
 		streamers.msg(msg)
 		timeinfo.msg(msg)
-		socials.msg(msg)
 	}
 }
 export default connect

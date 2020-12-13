@@ -1,18 +1,19 @@
 import { createStateLink } from '@hookstate/core'
 
 const initialValue = {
-	relations: [],
-	lastInteraction: '',
+	parts: []
 }
 const ref = createStateLink(initialValue)
 
 const link = (_ws) => { }
 
 const msg = (msg) => {
-	if (msg.type == 'socials') {
-		msg.info.relations.forEach((relation, i) => {
-			const blob = new Blob([relation.portrait], { type: `image/png` })
-			msg.info.relations[i].portraitURL = URL.createObjectURL(blob)
+	if (msg.type == 'gear') {
+		msg.info.parts.forEach((part, i) => {
+			part.apparels.forEach((apparel, j) => {
+				const blob = new Blob([apparel.preview], { type: `image/png` })
+				msg.info.parts[i].apparels[j].previewURL = URL.createObjectURL(blob)
+			})
 		})
 		ref.access().set(msg.info)
 	}

@@ -354,6 +354,15 @@ function socials(client, viewer, info) {
 	}
 }
 
+function gear(client, viewer, info) {
+	try {
+		const json = { type: 'gear', info: info }
+		client.viewers.filter((c) => sameUser(c.user, viewer)).forEach((c) => safeClientSend(c, json))
+	} catch (err) {
+		methodError('gear', err)
+	}
+}
+
 function setGameState(client, key, val) {
 	try {
 		clients
@@ -477,6 +486,7 @@ module.exports = {
 	streamerChange,
 	setClientState,
 	socials,
+	gear,
 	setGameState,
 	runJob,
 	incomingChat,

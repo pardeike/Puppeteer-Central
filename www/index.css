@@ -97,3 +97,8 @@ element {
 .semantic_ui_range_inner {
 	margin-left: 0 !important;
 }
+.square::before {
+  content: '';
+  display: block;
+  padding-top: 100%;
+}
