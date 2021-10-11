@@ -32,7 +32,7 @@
 		"express-ws": "4.0.0",
 		"helmet": "3.23.3",
 		"jsonwebtoken": "8.5.1",
-		"keypair": "1.0.1",
+		"keypair": "1.0.4",
 		"lodash": "4.17.21",
 		"memory-cache": "0.2.0",
 		"mongodb": "3.6.0",
