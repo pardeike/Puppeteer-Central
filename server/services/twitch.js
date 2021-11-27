@@ -59,7 +59,7 @@ const strategy = new TwitchStrategy(
 		await verifyToken(accessToken)
 		cb(undefined, {
 			id: profile.id,
-			name: profile.display_name,
+			name: profile.login,
 			picture: profile.profile_image_url,
 			service: 'twitch',
 		})
